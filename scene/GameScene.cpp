@@ -11,9 +11,32 @@ void GameScene::Initialize() {
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
+
+	view_.Initialize();
+
+	model_.reset(Model::Create());
+
+	std::vector<Model*> playerModels = {model_.get()};
+
+	player_ = std::make_unique<Player>();
+	player_->Initialize(playerModels);
+
+	camera_ = std::make_unique<Camera>();
+	camera_->Initialize(view_);
+	camera_->SetTarget(&player_->GetWorldTransform());
 }
 
-void GameScene::Update() {}
+void GameScene::Update() { 
+	camera_->Update();
+	view_.matView = camera_->GetView().matView;
+	view_.matProjection = camera_->GetView().matProjection;
+	view_.TransferMatrix();
+
+
+	player_->Update();
+
+	
+}
 
 void GameScene::Draw() {
 
@@ -41,7 +64,7 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-
+	player_->Draw(view_);
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
 #pragma endregion

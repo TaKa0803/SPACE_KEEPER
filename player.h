@@ -7,7 +7,7 @@
 #include"Glovalv.h"
 
 class Player : public BaseCharacter {
-private:
+public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
@@ -22,9 +22,7 @@ private:
 	void Draw(const ViewProjection& view) override;
 
 
-public:
-	// モデルと画像
-	std::vector<Model*> models_;
+private:
 	// キー入力
 	Input* input_ = nullptr;
 

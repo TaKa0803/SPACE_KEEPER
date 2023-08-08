@@ -9,6 +9,8 @@
 #include "ViewProjection.h"
 #include "WorldTransform.h"
 
+#include"player.h"
+#include"camera.h"
 /// <summary>
 /// ゲームシーン
 /// </summary>
@@ -48,4 +50,14 @@ private: // メンバ変数
 	/// <summary>
 	/// ゲームシーン用
 	/// </summary>
+	/// 
+	ViewProjection view_;
+
+
+	//model
+	std::unique_ptr<Model> model_ = nullptr;
+
+	std::unique_ptr<Player> player_ = nullptr;
+
+	std::unique_ptr<Camera> camera_ = nullptr;
 };
