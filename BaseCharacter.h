@@ -2,7 +2,6 @@
 #include <Model.h>
 #include <WorldTransform.h>
 #include <vector>
-
 class BaseCharacter {
 protected:
 	// モデルデータ配列

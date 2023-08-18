@@ -11,6 +11,7 @@
 
 #include"player.h"
 #include"camera.h"
+#include"skydome.h"
 /// <summary>
 /// ゲームシーン
 /// </summary>
@@ -42,7 +43,18 @@ public: // メンバ関数
 	/// </summary>
 	void Draw();
 
-private: // メンバ変数
+
+
+
+private: 	
+#pragma region 各種クラス内呼び出し関数
+	void LoadModel();
+	void LoadClass();
+	void DrawModel();
+	void DrawSprite();
+#pragma endregion
+	
+	// メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
@@ -53,11 +65,18 @@ private: // メンバ変数
 	/// 
 	ViewProjection view_;
 
-
-	//model
-	std::unique_ptr<Model> model_ = nullptr;
+	float farZ = 500;
 
 	std::unique_ptr<Player> player_ = nullptr;
 
 	std::unique_ptr<Camera> camera_ = nullptr;
+
+	std::unique_ptr<Skydome> skydome_ = nullptr;
+
+
+	//model
+	std::unique_ptr<Model> model_ = nullptr;
+
+	std::unique_ptr<Model> sky_ = nullptr;
+	
 };
