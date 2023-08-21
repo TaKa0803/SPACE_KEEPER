@@ -8,10 +8,10 @@ void Camera::Initialize(const ViewProjection& world,Model*model) {
 
 	world_.Initialize();
 	
-
+	view_.farZ = 2000;
 	view_.Initialize();
-	view_.farZ = world.farZ*2.0f;
-
+	
+	world;
 	cameraWorld_.Initialize();
 	// 注目アイテムと距離設定
 	cameraWorld_.translation_ = {0, 0, -50};
@@ -35,6 +35,8 @@ void Camera::cameraRotate(float num) {
 	Vector2 velo = {retipos.x - zero.x, retipos.y - zero.y};
 	float length = sqrtf(velo.x*velo.x+velo.y*velo.y);
 
+	
+
 	//枠外にレティクルが出ていたら
 	if (length > num) {
 		Vector2 newpos = {
@@ -42,28 +44,68 @@ void Camera::cameraRotate(float num) {
 		    num*(velo.y / length),
 		};
 		reticleWorld_.translation_ = {newpos.x, newpos.y, reticleWorld_.translation_.z};
+	
+		
 	};
+	// 距離によって向く量変更
+	float X = reticleWorld_.translation_.x / num;
+	float Y = reticleWorld_.translation_.y / num;
+
+	//
+	X = sqrtf(X * X);
+	Y = sqrtf(Y * Y);
+
+	//カメラ方向処理
 	
-
-	/*
-	if (reticleWorld_.translation_.x > num) {
-		reticleWorld_.translation_.x = num;
-		world_.rotation_.y += kRotateTheta;
-
-	} else if (reticleWorld_.translation_.x < -num) {
-		reticleWorld_.translation_.x = -num;
-		world_.rotation_.y -= kRotateTheta;
+	if (reticleWorld_.translation_.y > 0) {
+		world_.rotation_.x -= kRotateTheta * Y;
+	} else {
+		world_.rotation_.x += kRotateTheta * Y;
+	}
+	
+	//一周超えたら数値を下げる（叔母風呂対策
+	if (world_.rotation_.x > pi * 2.0f) {
+		world_.rotation_.x -= pi * 2.0f;
+	} else if (world_.rotation_.x < -(pi * 2.0f)) {
+		world_.rotation_.x += pi * 2.0f;
 	}
 
-	if (reticleWorld_.translation_.y > num) {
-		reticleWorld_.translation_.y = num;
-		world_.rotation_.x -= kRotateTheta;
+	//プラス方向
+	if (world_.rotation_.x > pi * (1.0f / 2.0f) && world_.rotation_.x < pi* (3.0f / 2.0f)) {
+		if (reticleWorld_.translation_.x > 0) {
+			world_.rotation_.y -= kRotateTheta * X;
+		} else {
+			world_.rotation_.y += kRotateTheta * X;
+		}
+	} else if(world_.rotation_.x>0.0f){
+		if (reticleWorld_.translation_.x > 0) {
+			world_.rotation_.y += kRotateTheta * X;
+		} else {
+			world_.rotation_.y -= kRotateTheta * X;
+		}
+	} 
 	
-	} else if (reticleWorld_.translation_.y < -num) {
-		reticleWorld_.translation_.y = -num;
-		world_.rotation_.x += kRotateTheta;
+	if(world_.rotation_.x <-( pi * (1.0f / 2.0f) )&& world_.rotation_.x >-( pi * (3.0f / 2.0f))) {
+		if (reticleWorld_.translation_.x > 0) {
+			world_.rotation_.y -= kRotateTheta * X;
+		} else {
+			world_.rotation_.y += kRotateTheta * X;
+		}
+	} else if(world_.rotation_.x<0.0f){
+		if (reticleWorld_.translation_.x > 0) {
+			world_.rotation_.y += kRotateTheta * X;
+		} else {
+			world_.rotation_.y -= kRotateTheta * X;
+		}
 	}
-	*/
+
+
+	// 一周超えたら数値を下げる（叔母風呂対策
+	if (world_.rotation_.y > pi * 2.0f) {
+		world_.rotation_.y -= pi * 2.0f;
+	} else if (world_.rotation_.y < -(pi * 2.0f)) {
+		world_.rotation_.y += pi * 2.0f;
+	}
 }
 
 void Camera::Update() { 
@@ -119,6 +161,7 @@ void Camera::Update() {
 	cameraWorld_.UpdateMatrix();
 	cameraWorld_.matWorld_ = Multiply(cameraWorld_.matWorld_, world_.matWorld_);
 
+	
 	view_.matView = Inverse(cameraWorld_.matWorld_);
 	view_.TransferMatrix();
 }

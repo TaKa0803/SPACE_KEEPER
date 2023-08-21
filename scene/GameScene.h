@@ -12,6 +12,11 @@
 #include"player.h"
 #include"camera.h"
 #include"skydome.h"
+#include"PlayerBullet.h"
+#include<sstream>
+
+#include <list>
+
 /// <summary>
 /// ゲームシーン
 /// </summary>
@@ -43,7 +48,7 @@ public: // メンバ関数
 	/// </summary>
 	void Draw();
 
-
+	void AddPlayerBullet(PlayerBullet* playerBullet);
 
 
 private: 	
@@ -65,13 +70,18 @@ private:
 	/// 
 	ViewProjection view_;
 
-	float farZ = 500;
+	float farZ = 2000;
 
 	std::unique_ptr<Player> player_ = nullptr;
 
 	std::unique_ptr<Camera> camera_ = nullptr;
 
 	std::unique_ptr<Skydome> skydome_ = nullptr;
+
+	// プレイヤーの弾
+	std::list<PlayerBullet*> playerbullets_;
+
+
 
 
 	//model

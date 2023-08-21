@@ -115,6 +115,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math_matrix.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="PlayerBullet.cpp" />
     <ClCompile Include="scene\GameScene.cpp" />
     <ClCompile Include="skydome.cpp" />
     <ClCompile Include="WorldEx.cpp" />
@@ -153,6 +154,7 @@
     <ClInclude Include="math\Vector4.h" />
     <ClInclude Include="math_matrix.h" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="PlayerBullet.h" />
     <ClInclude Include="scene\GameScene.h" />
     <ClInclude Include="skydome.h" />
   </ItemGroup>

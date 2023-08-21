@@ -39,9 +39,16 @@ private:
 	ViewProjection view_;
 
 	//回転軸の処理 
-	float kRotateTheta = 1.0f / 120.0f;
+	float kRotateTheta = (1.0f / 120.0f)*3.14f;
+
+	float pi = 3.14f;
+
+	
 
 	// レティクルのワールド
 	WorldTransform reticleWorld_;
 	Model* model_;
+
+
+
 };
