@@ -177,9 +177,20 @@ void Reticle::Back() {
 
 
 void Reticle::Update(WorldTransform&world_) { 
-	
+	#ifdef _DEBUG
+	ImGui::Begin("Reticle");
+	ImGui::Text("pos :%4.1f/%4.1f/%4.1f", reticleWorld_.translation_.x, reticleWorld_.translation_.y,reticleWorld_.translation_.z);
+	ImGui::Text("rotate :%4.1f/%4.1f/%4.1f", reticleWorld_.rotation_.x, reticleWorld_.rotation_.y,reticleWorld_.rotation_.z);
+	ImGui::Text("scale :%4.1f/%4.1f/%4.1f", reticleWorld_.scale_.x, reticleWorld_.scale_.y,reticleWorld_.scale_.z);
+	ImGui::End();
+#endif // _DEBUG
+
+	Back();
+	//移動処理
 	Move();
+	//カメラ回転処理
 	CameraRotate(world_);
+	//行列更新
 	reticleWorld_.UpdateMatrix();
 
 }

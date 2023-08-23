@@ -1,13 +1,13 @@
 #pragma once
 #include<WorldTransform.h>
 #include<ViewProjection.h>
-#include<Input.h>
+
 #include<Model.h>
 
 #include"Reticle.h"
 class Camera {
 public:
-	void Initialize(const ViewProjection& world, Model* model, float farZ);
+	void Initialize(Model* model, float farZ);
 
 	void Update();
 
@@ -19,12 +19,9 @@ public:
 
 	void SetTarget(const WorldTransform* target) { target_ = target; }
 
-	const WorldTransform& GetreticleW() { return reticleWorld_; }
+	const WorldTransform& GetreticleW() { return reticle_->GetRW(); }
 
 private:
-	void cameraRotate();
-
-	void BackCamera();
 	// キー入力
 	Input* input_ = nullptr;
 
@@ -40,31 +37,7 @@ private:
 	// カメラに渡すビュー
 	ViewProjection view_;
 
-	// 回転軸の処理
-	float kRotateTheta = (1.0f / 120.0f) * 3.14f;
-
-	float pi = 3.14f;
-
 	
-	// レティクルのワールド
-	WorldTransform reticleWorld_;
-	Model* model_;
-
-	//制限範囲
-	const float area = 30;
-
-
-
-	const Vector2 zeroP_ = {0, 0};
+	Reticle *reticle_ = nullptr;
 	
-	//レティクルを戻すときのベクトル
-	Vector2 maxBackVec_;
-	//レティクル戻る処理のフラグ
-	bool isBackRetcle_=false;
-
-	//イージング用T
-	float easingT_ = 0;
-
-	//フレーム加算するイージング
-	const float addT_ = 1.0f / 60.0f;
 };

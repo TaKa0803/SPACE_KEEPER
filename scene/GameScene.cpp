@@ -10,24 +10,7 @@ GameScene::~GameScene() {
 	}
 }
 
-void GameScene::LoadModel() { 
-	model_.reset(Model::Create());
-	sky_.reset(Model::CreateFromOBJ("sssssk"));
-}
 
-void GameScene::LoadClass() {
-	std::vector<Model*> playerModels = {model_.get()};
-	player_ = std::make_unique<Player>();
-	player_->Initialize(playerModels);
-	player_->SetgameScene(this);
-	camera_ = std::make_unique<Camera>();
-	camera_->Initialize(view_,model_.get(),farZ);
-	camera_->SetTarget(&player_->GetWorldTransform());
-	player_->SetReticle(&camera_->GetreticleW());
-
-	skydome_ = std::make_unique<Skydome>();
-	skydome_->Initialize(sky_.get(),farZ);
-}
 
 void GameScene::Initialize() {
 	dxCommon_ = DirectXCommon::GetInstance();
@@ -38,7 +21,24 @@ void GameScene::Initialize() {
 	LoadModel();
 	LoadClass();
 }
+void GameScene::LoadModel() {
+	model_.reset(Model::Create());
+	sky_.reset(Model::CreateFromOBJ("sssssk"));
+}
 
+void GameScene::LoadClass() {
+	std::vector<Model*> playerModels = {model_.get()};
+	player_ = std::make_unique<Player>();
+	player_->Initialize(playerModels);
+	player_->SetgameScene(this);
+	camera_ = std::make_unique<Camera>();
+	camera_->Initialize(model_.get(), farZ);
+	camera_->SetTarget(&player_->GetWorldTransform());
+	player_->SetReticle(&camera_->GetreticleW());
+
+	skydome_ = std::make_unique<Skydome>();
+	skydome_->Initialize(sky_.get(), farZ);
+}
 void GameScene::AddPlayerBullet(PlayerBullet* playerBullet) {
 	// リストに登録する
 	playerbullets_.push_back(playerBullet);

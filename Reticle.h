@@ -11,6 +11,8 @@ public:
 
 	void Draw(ViewProjection view);
 
+	const WorldTransform& GetRW() { return reticleWorld_; }
+
 private:
 #pragma region まとめ
 	void Move();
