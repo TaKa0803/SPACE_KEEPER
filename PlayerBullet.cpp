@@ -7,7 +7,7 @@ void PlayerBullet::Initialize(Model* model, const Vector3& position, const Vecto
 	//textureHandle_ = TextureManager::Load("Green.png");
 	worldTransform_.Initialize();
 	worldTransform_.translation_ = position;
-	worldTransform_.scale_ = {1.5f, 1.5f, 2.5f};
+	worldTransform_.scale_ = {1.5f, 1.5f, 1.5f};
 	velocity_ = velocity;
 }
 

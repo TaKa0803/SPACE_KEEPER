@@ -1,5 +1,5 @@
 #include"math_matrix.h"
-
+#include<Vector2.h>
 #include <cassert>
 #include <cmath>
 
@@ -394,4 +394,22 @@ Matrix4x4 Transpose(const Matrix4x4& m) {
 // 単位行列の作成
 Matrix4x4 MakeIdentity4x4() { return {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}; }
 
+#pragma endregion
+
+#pragma region V2
+Vector2 AddV2(Vector2 v1, Vector2 v2) { return {v1.x + v2.x, v1.y + v2.y};}
+
+Vector2 SubV2(Vector2 v1, Vector2 v2) { return {v1.x - v2.x, v1.y - v2.y}; }
+
+Vector2 ScaV2(float A, Vector2 v) { return {v.x * A, v.y * A}; }
+
+float LengV2(Vector2 v) { return sqrtf(v.x * v.x + v.y * v.y); }
+
+Vector2 NorV2(Vector2 v) { 
+	float L = LengV2(v);
+	return {
+	    v.x / L,
+	    v.y / L,
+	};
+}
 #pragma endregion

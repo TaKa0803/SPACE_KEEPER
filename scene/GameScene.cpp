@@ -21,7 +21,7 @@ void GameScene::LoadClass() {
 	player_->Initialize(playerModels);
 	player_->SetgameScene(this);
 	camera_ = std::make_unique<Camera>();
-	camera_->Initialize(view_,model_.get());
+	camera_->Initialize(view_,model_.get(),farZ);
 	camera_->SetTarget(&player_->GetWorldTransform());
 	player_->SetReticle(&camera_->GetreticleW());
 
@@ -33,7 +33,7 @@ void GameScene::Initialize() {
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
-	view_.farZ = farZ;
+	view_.farZ = farZ*2.0f;
 	view_.Initialize();
 	LoadModel();
 	LoadClass();

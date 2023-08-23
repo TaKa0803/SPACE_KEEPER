@@ -1,7 +1,15 @@
 #pragma once
 #include <Matrix4x4.h>
 #include <Vector3.h>
+#include<Vector2.h>
 
+#pragma region V2
+Vector2 AddV2(Vector2 v1, Vector2 v2);
+Vector2 SubV2(Vector2 v1, Vector2 v2);
+Vector2 ScaV2(float A, Vector2 v);
+float LengV2(Vector2 v);
+Vector2 NorV2(Vector2 v);
+#pragma endregion
 
 Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m);
 

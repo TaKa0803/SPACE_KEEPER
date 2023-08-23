@@ -4,7 +4,7 @@ void Skydome::Initialize(Model* model, float farZ) {
 	model_ = model;
 	world_.Initialize();
 	farZ;
-	world_.scale_ = {2, 2, 2};
+	world_.scale_ = {farZ, farZ, farZ};
 }
 
 void Skydome::Update() { world_.UpdateMatrix(); }

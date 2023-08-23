@@ -3,6 +3,7 @@
 #include<cmath>
 #include"math_matrix.h"
 #include<GameScene.h>
+#include<iostream>
 
 
 
@@ -22,6 +23,10 @@ void Player::Attack() {
 		const float kBulletSpeed = 4.0f;
 		Vector3 velocity = Subtract(GetReticleMat(), GetplayermatTranslate());
 		velocity = Multiply(kBulletSpeed, Normalize(velocity));
+
+		//`theata
+		//Vector3 rotation__{0,0,0};
+
 		// 弾を生成して初期化
 		PlayerBullet* newBullet = new PlayerBullet();
 		newBullet->Initialize(ammo, GetplayermatTranslate(), velocity);
@@ -48,7 +53,7 @@ void Player::Move() {
 	ImGui::Text("Reticle");
 	ImGui::Text("pos %4.1f/%4.1f", Reticle_->translation_.x, Reticle_->translation_.y);
 #endif // _DEBUG
-	//worldtransform_.translation_ = Add(worldtransform_.translation_,move);
+	worldtransform_.translation_ = Add(worldtransform_.translation_,move);
 
 
 	worldtransform_.UpdateMatrix();

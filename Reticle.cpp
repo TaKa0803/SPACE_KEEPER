@@ -1,94 +1,94 @@
-#include"camera.h"
-#include"math_matrix.h"
+#include"Reticle.h"
 #include<ImGuiManager.h>
+#include"math_matrix.h"
 
-
-Vector2 Esing(const Vector2 zero,const Vector2 one, float t) {
+Vector2 Esing(const Vector2 zero, const Vector2 one, float t) {
 	return {
 	    zero.x * (1.0f - t) + one.x * t,
 	    zero.y * (1.0f - t) + one.y * t,
 	};
 }
 
-void Camera::Initialize(const ViewProjection& world,Model*model,float farZ) { 
 
+void Reticle::Initialize(Model* model, const WorldTransform& parent) {
 	input_ = Input::GetInstance();
-
-	world_.Initialize();
 	
-	view_.farZ = farZ*2.0f+500.0f;
-	view_.Initialize();
-	
-	world;
-	cameraWorld_.Initialize();
-	// 注目アイテムと距離設定
-	cameraWorld_.translation_ = {0, 0, -50};
-
 	reticleWorld_.Initialize();
-	reticleWorld_.translation_ = {0, 0, 30};
-	reticleWorld_.parent_ = &world_;
+	reticleWorld_.translation_ = NormalPos;
+	reticleWorld_.parent_ = &parent;
 
 	model_ = model;
-
-	maxBackVec_ = {0, 0};
 }
 
+void Reticle::Move() {
 
+	//キー入力による移動
+	if (input_->PushKey(DIK_W)) {
+		reticleWorld_.translation_.y += moveNum;
+	}
+	if (input_->PushKey(DIK_S)) {
+		reticleWorld_.translation_.y -= moveNum;
+	}
+	if (input_->PushKey(DIK_A)) {
+		reticleWorld_.translation_.x -= moveNum;
+	}
+	if (input_->PushKey(DIK_D)) {
+		reticleWorld_.translation_.x += moveNum;
+	}
 
-
-
-
-
-
-
-void Camera::cameraRotate() { 
-
-
+	//枠外に出てないかのチェック
 	Vector2 zero = {0, 0};
 	Vector2 retipos = {reticleWorld_.translation_.x, reticleWorld_.translation_.y};
-	Vector2 velo = {retipos.x - zero.x, retipos.y - zero.y};
-	float length = sqrtf(velo.x*velo.x+velo.y*velo.y);
+	Vector2 velo = SubV2(retipos, zero);
+	float length = LengV2(velo);
 
-	
-
-	//枠外にレティクルが出ていたら
+	// 枠外にレティクルが出ていたら
 	if (length > area) {
-		Vector2 newpos = {
-		    area*(velo.x / length),
-		    area*(velo.y / length),
-		};
+		//長さを正規化して最大値まで伸ばす
+		Vector2 newpos = ScaV2(area, NorV2(velo));
+		//伸ばした値を代入
 		reticleWorld_.translation_ = {newpos.x, newpos.y, reticleWorld_.translation_.z};
 	};
+
+
+}
+
+void Reticle::CameraRotate(WorldTransform& world_) {
 	// 距離によって向く量変更
 	float X = reticleWorld_.translation_.x / area;
 	float Y = reticleWorld_.translation_.y / area;
 
-	//
+	//プラスに修正
 	X = sqrtf(X * X);
 	Y = sqrtf(Y * Y);
 
-	//カメラ方向処理
+	// カメラの回転処理
 #pragma region カメラのworldの変更
+
+	//ゼロでなければ回転
 	if (reticleWorld_.translation_.y > 0) {
 		world_.rotation_.x -= kRotateTheta * Y;
 	} else {
 		world_.rotation_.x += kRotateTheta * Y;
 	}
-
-	// 一周超えたら数値を下げる（叔母風呂対策
+	// 一周超えたら数値を下げる（オーバーフロー対策
 	if (world_.rotation_.x > pi * 2.0f) {
 		world_.rotation_.x -= pi * 2.0f;
 	} else if (world_.rotation_.x < -(pi * 2.0f)) {
 		world_.rotation_.x += pi * 2.0f;
 	}
 
-	// プラス方向
+	/// 画面の上下と世界の上下が逆転した際の左右の回転軸の加算処理
+	//正面から+1/2Π以上+3/2未満の場合の処理
 	if (world_.rotation_.x > pi * (1.0f / 2.0f) && world_.rotation_.x < pi * (3.0f / 2.0f)) {
+		
+		//レティクルの位置関係から加算する符号を変える
 		if (reticleWorld_.translation_.x > 0) {
 			world_.rotation_.y -= kRotateTheta * X;
 		} else {
 			world_.rotation_.y += kRotateTheta * X;
 		}
+	//それ以外の+角度の場合
 	} else if (world_.rotation_.x > 0.0f) {
 		if (reticleWorld_.translation_.x > 0) {
 			world_.rotation_.y += kRotateTheta * X;
@@ -96,13 +96,14 @@ void Camera::cameraRotate() {
 			world_.rotation_.y -= kRotateTheta * X;
 		}
 	}
-
+	// 正面から-1/2Π以上-3/2未満の場合の処理
 	if (world_.rotation_.x < -(pi * (1.0f / 2.0f)) && world_.rotation_.x > -(pi * (3.0f / 2.0f))) {
 		if (reticleWorld_.translation_.x > 0) {
 			world_.rotation_.y -= kRotateTheta * X;
 		} else {
 			world_.rotation_.y += kRotateTheta * X;
 		}
+	// それ以外の-角度の場合
 	} else if (world_.rotation_.x < 0.0f) {
 		if (reticleWorld_.translation_.x > 0) {
 			world_.rotation_.y += kRotateTheta * X;
@@ -118,17 +119,12 @@ void Camera::cameraRotate() {
 		world_.rotation_.y += pi * 2.0f;
 	}
 #pragma endregion
-
-	
 }
-void Camera::BackCamera() {
+
+void Reticle::Back() {
 	// キー入力のないときに０地点に戻る
-	if (!input_->PushKey(DIK_W) &&
-		!input_->PushKey(DIK_A) &&
-		!input_->PushKey(DIK_S) &&
-	    !input_->PushKey(DIK_D)
-		) 
-	{
+	if (!input_->PushKey(DIK_W) && !input_->PushKey(DIK_A) && !input_->PushKey(DIK_S) &&
+	    !input_->PushKey(DIK_D)) {
 		if (!isBackRetcle_) {
 			// レティクル戻す処理フラグ起動
 			isBackRetcle_ = true;
@@ -160,87 +156,36 @@ void Camera::BackCamera() {
 		isBackRetcle_ = false;
 	}
 
-	//フラグ作動中の移動処理
+	// フラグ作動中の移動処理
 	if (isBackRetcle_) {
-		//ゼロに向かう
+		// ゼロに向かう
 		easingT_ -= addT_;
 
-		//ゼロ以下で終了
+		// ゼロ以下で終了
 		if (easingT_ <= 0.0f) {
 			easingT_ = 0.0f;
-			isBackRetcle_ =false;
+			isBackRetcle_ = false;
 		}
-		//イージングして移動
-		Vector2 newP = Esing(zeroP_, maxBackVec_,easingT_);
+		// イージングして移動
+		Vector2 newP = Esing(zeroP_, maxBackVec_, easingT_);
 
 		reticleWorld_.translation_.x = newP.x;
 		reticleWorld_.translation_.y = newP.y;
 	}
-
-
 }
 
-void Camera::Update() { 
-	#ifdef _DEBUG
-	ImGui::Begin("MainCamera");
-#endif // _DEBUG
 
 
-
-	//ターゲットから座標を取得した行列を作る
+void Reticle::Update(WorldTransform&world_) { 
 	
-	world_.translation_ = target_->translation_;
-	
-	if (input_->PushKey(DIK_W)) {
-		reticleWorld_.translation_.y += 1.0f;
-	}
-	if (input_->PushKey(DIK_S)) {
-		reticleWorld_.translation_.y -= 1.0f;
-	}
-	if (input_->PushKey(DIK_A)) {
-		reticleWorld_.translation_.x -= 1.0f;
-	}
-	if (input_->PushKey(DIK_D)) {
-		reticleWorld_.translation_.x += 1.0f;
-	}
-
-#ifdef _DEBUG
-	ImGui::Text("Reticle");
-	ImGui::DragFloat3("pos", &reticleWorld_.translation_.x, 0.01f);
-	ImGui::DragFloat3("rotate", &reticleWorld_.rotation_.x, 0.01f);
-	ImGui::DragFloat3("scale", &reticleWorld_.scale_.x, 0.01f);
-#endif // _DEBUG
-
-	BackCamera();
-	
-	// エリア超えていたらカメラも回転
-	cameraRotate();
-	
+	Move();
+	CameraRotate(world_);
 	reticleWorld_.UpdateMatrix();
 
-
-
-#ifdef _DEBUG
-	ImGui::Text("camera");
-	ImGui::DragFloat3("rotation",&world_.rotation_.x,0.01f);
-	ImGui::DragFloat("far",&cameraWorld_.translation_.z, 0.01f);
-	
-#endif // _DEBUG
-
-
-
-	world_.UpdateMatrix();
-
-	cameraWorld_.UpdateMatrix();
-	cameraWorld_.matWorld_ = Multiply(cameraWorld_.matWorld_, world_.matWorld_);
-
-	
-	view_.matView = Inverse(cameraWorld_.matWorld_);
-	view_.TransferMatrix();
-
-#ifdef _DEBUG
-	ImGui::End();
-#endif // _DEBUG
 }
 
-void Camera::Draw(ViewProjection view) { model_->Draw(reticleWorld_, view); }
+void Reticle::Draw(ViewProjection view) { 
+
+	model_->Draw(reticleWorld_, view);
+
+}
