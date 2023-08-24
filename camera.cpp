@@ -2,9 +2,6 @@
 #include"math_matrix.h"
 #include<ImGuiManager.h>
 
-
-
-
 void Camera::Initialize(Model*model,float farZ) { 
 
 	input_ = Input::GetInstance();
@@ -17,19 +14,11 @@ void Camera::Initialize(Model*model,float farZ) {
 	
 	cameraWorld_.Initialize();
 	// 注目アイテムと距離設定
-	cameraWorld_.translation_ = {0, 0, -50};
+	cameraWorld_.translation_ = {0, 10, -50};
 
 	reticle_ =new Reticle();
 	reticle_->Initialize(model, world_);
 }
-
-
-
-
-
-
-
-
 
 void Camera::Update() { 
 	#ifdef _DEBUG
@@ -44,6 +33,7 @@ void Camera::Update() {
 	
 #ifdef _DEBUG
 	ImGui::Text("camera");
+	ImGui::DragFloat3("position", &world_.translation_.x, 0.01f);
 	ImGui::DragFloat3("rotation",&world_.rotation_.x,0.01f);
 	ImGui::DragFloat("far",&cameraWorld_.translation_.z, 0.01f);
 #endif // _DEBUG

@@ -28,6 +28,9 @@ public:
 	// ゲームシーン
 	void SetgameScene(GameScene* gameScene) { gameScene_ = gameScene; }
 
+
+	void InCollision();
+
 private:
 #pragma region まとめ
 	void Move();

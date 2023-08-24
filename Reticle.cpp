@@ -112,6 +112,16 @@ void Reticle::CameraRotate(WorldTransform& world_) {
 		}
 	}
 
+	//ゼロの場合
+	if (world_.rotation_.x == 0.0f) {
+		//レティクルのx座標追加
+		if (reticleWorld_.translation_.x > 0) {
+			world_.rotation_.y += kRotateTheta * X;
+		} else {
+			world_.rotation_.y -= kRotateTheta * X;
+		}
+	}
+
 	// 一周超えたら数値を下げる（叔母風呂対策
 	if (world_.rotation_.y > pi * 2.0f) {
 		world_.rotation_.y -= pi * 2.0f;
