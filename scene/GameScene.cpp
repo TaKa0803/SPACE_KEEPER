@@ -8,44 +8,80 @@ GameScene::~GameScene() {
 	for (PlayerBullet* bullet : playerbullets_) {
 		delete bullet;
 	}
+
+	for (Enemy* enemy : enemy_) {
+		delete enemy;
+	}
 }
 
-
-
+//初期化
 void GameScene::Initialize() {
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
 	view_.farZ = farZ*2.0f;
 	view_.Initialize();
+	LoadTexture();
 	LoadModel();
 	LoadClass();
 }
+
+//モデルのロードまとめ
 void GameScene::LoadModel() {
-	model_.reset(Model::Create());
+	baseModel_.reset(Model::Create());
 	sky_.reset(Model::CreateFromOBJ("sssssk"));
 }
 
+//クラスのロードまとめ
 void GameScene::LoadClass() {
-	std::vector<Model*> playerModels = {model_.get()};
+	std::vector<Model*> playerModels = {baseModel_.get()};
+
 	player_ = std::make_unique<Player>();
-	player_->Initialize(playerModels);
+	player_->Initialize(playerModels,10);
 	player_->SetgameScene(this);
+
 	camera_ = std::make_unique<Camera>();
-	camera_->Initialize(model_.get(), farZ);
+	camera_->Initialize(baseModel_.get(), farZ);
 	camera_->SetTarget(&player_->GetWorldTransform());
 	player_->SetReticle(&camera_->GetreticleW());
 
 	skydome_ = std::make_unique<Skydome>();
 	skydome_->Initialize(sky_.get(), farZ);
+
+	core_ = std::make_unique<Core>();
+	core_->Initialize(baseModel_.get());
+
 }
+
+//画像ロード
+void GameScene::LoadTexture() { basicTex_ = TextureManager::Load("uvChecker.png"); }
+
+
+//プレイヤーの弾追加
 void GameScene::AddPlayerBullet(PlayerBullet* playerBullet) {
 	// リストに登録する
 	playerbullets_.push_back(playerBullet);
 }
 
+void GameScene::EnemyPop() {
+	//条件クリアで出現
+	if (input_->TriggerKey(DIK_0)) {
+		// 敵出現
+		Vector3 pos1 = {100, 100, 100};
+		Vector3 pos2 = {-100, 100, 100};
+		Vector3 pos3 = {100, 100, -100};
+		Vector3 pos4 = {-100, 100, -100};
+
+		Vector3 pos5 = {100, -100, 100};
+		Vector3 pos6 = {-100, -100, 100};
+		Vector3 pos7 = {100, -100, -100};
+		Vector3 pos8 = {-100, -100, -100};
+	}
+
+}
 
 
+//更新処理
 void GameScene::Update() { 
 	skydome_->Update();
 	
@@ -56,6 +92,7 @@ void GameScene::Update() {
 
 	player_->Update();
 
+	core_->Update();
 #pragma region 自分の弾更新
 	// 自分の弾の更新
 	for (PlayerBullet* bullet : playerbullets_) {
@@ -114,17 +151,19 @@ void GameScene::Draw() {
 #pragma endregion
 }
 
+//モデルの描画
 void GameScene::DrawModel() { 
 	skydome_->Draw(view_);
 	player_->Draw(view_);
 	camera_->Draw(view_);
-
+	core_->Draw(view_);
 
 	for (PlayerBullet* bullet : playerbullets_) {
 		bullet->Draw(view_);
 	}
 }
 
+//スプライト描画
 void GameScene::DrawSprite() {
 
 

@@ -7,14 +7,19 @@
 
 
 
-void Player::Initialize(const std::vector<Model*>& models) { 
-	BaseCharacter::Initialize(models);
+void Player::Initialize(const std::vector<Model*>& models, const uint32_t HP) { 
+	BaseCharacter::Initialize(models,HP);
 	input_ = Input::GetInstance();
 	ammo = models_[0];
 
-
+	worldtransform_.translation_ = {0, 0, -500};
 }
 
+void Player::InCollision() {
+	if (hp_-- <= 0) {
+		isDead_ = true;
+	}
+}
 
 void Player::Attack() {
 	//スペースキーでレティクルに弾発射

@@ -14,8 +14,9 @@
 #include"skydome.h"
 #include"PlayerBullet.h"
 #include<sstream>
-
+#include"core.h"
 #include <list>
+#include"Enemy.h"
 
 /// <summary>
 /// ゲームシーン
@@ -55,8 +56,11 @@ private:
 #pragma region 各種クラス内呼び出し関数
 	void LoadModel();
 	void LoadClass();
+	void LoadTexture();
 	void DrawModel();
 	void DrawSprite();
+
+	void EnemyPop();
 #pragma endregion
 	
 	// メンバ変数
@@ -78,15 +82,28 @@ private:
 
 	std::unique_ptr<Skydome> skydome_ = nullptr;
 
+	std::unique_ptr<Core> core_ = nullptr;
+
+	//敵
+	std::list<Enemy*> enemy_;
+
+
 	// プレイヤーの弾
 	std::list<PlayerBullet*> playerbullets_;
 
 
 
-
-	//model
-	std::unique_ptr<Model> model_ = nullptr;
-
+#pragma region モデル
+	// 仮model
+	std::unique_ptr<Model> baseModel_ = nullptr;
+	//天球
 	std::unique_ptr<Model> sky_ = nullptr;
+#pragma endregion
+
+
+#pragma region texture
+	uint32_t basicTex_;
+#pragma endregion
+
 	
 };

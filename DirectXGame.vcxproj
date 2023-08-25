@@ -112,6 +112,7 @@
     <ClCompile Include="base\WinApp.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="core.cpp" />
+    <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Glovalv.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math_matrix.cpp" />
@@ -149,6 +150,7 @@
     <ClInclude Include="base\WinApp.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="core.h" />
+    <ClInclude Include="Enemy.h" />
     <ClInclude Include="Glovalv.h" />
     <ClInclude Include="input\Input.h" />
     <ClInclude Include="math\Matrix4x4.h" />

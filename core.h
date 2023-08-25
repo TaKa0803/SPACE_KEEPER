@@ -3,7 +3,7 @@
 #include<WorldTransform.h>
 class Core {
 public:
-	void Initialize(Model* model, uint32_t textu);
+	void Initialize(Model* model);
 
 	void Update();
 
@@ -11,10 +11,13 @@ public:
 
 	void InCollision();
 
+	bool IsDead() { return isdead_; }
+
+
 private:
 	Model* model_ = nullptr;
 
-	uint32_t texture_;
+	
 	WorldTransform world_;
 
 	int32_t hp_;

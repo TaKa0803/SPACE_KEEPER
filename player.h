@@ -13,7 +13,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(const std::vector<Model*>& models) override;
+	void Initialize(const std::vector<Model*>& models, const uint32_t HP) override;
 	/// <summary>
 	/// 更新
 	/// </summary>
