@@ -9,6 +9,9 @@ enum class Phase {
 	SHOT,//射撃
 };
 
+
+class GameScene;
+
 class Enemy : public BaseCharacter {
 public:
 	void Initialize(const std::vector<Model*>& models, const uint32_t HP,Vector3 pos);
@@ -17,9 +20,10 @@ public:
 
 	void Draw(const ViewProjection& view) override;
 	
-	void InCollision();
+	void OnCollision();
+
 
 	private:
-
+	GameScene* gameScene_=nullptr;
 
 };

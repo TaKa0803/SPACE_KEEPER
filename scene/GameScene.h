@@ -44,6 +44,10 @@ public: // メンバ関数
 	/// </summary>
 	void Update();
 
+	void CheckAllCollision();
+
+	void UpdateDelete();
+
 	/// <summary>
 	/// 描画
 	/// </summary>
@@ -61,6 +65,11 @@ private:
 	void DrawSprite();
 
 	void EnemyPop();
+
+	void AddEnemy(Vector3 pos);
+
+	
+	
 #pragma endregion
 	
 	// メンバ変数
@@ -98,6 +107,9 @@ private:
 	std::unique_ptr<Model> baseModel_ = nullptr;
 	//天球
 	std::unique_ptr<Model> sky_ = nullptr;
+
+	std::vector<Model*> enemyModels_ ;
+
 #pragma endregion
 
 

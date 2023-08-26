@@ -25,11 +25,9 @@ public:
 
 	void SetReticle(const WorldTransform* reticle) { Reticle_ = reticle; }
 
-	// ゲームシーン
-	void SetgameScene(GameScene* gameScene) { gameScene_ = gameScene; }
+	
 
-
-	void InCollision();
+	void OnCollision();
 
 private:
 #pragma region まとめ
@@ -63,6 +61,5 @@ private:
 	//プレイヤー情報をもらう場所
 	const WorldTransform* Reticle_;
 
-	// ゲームシーン
-	GameScene* gameScene_ = nullptr;
+	
 };

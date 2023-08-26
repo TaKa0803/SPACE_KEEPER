@@ -15,7 +15,7 @@ void Player::Initialize(const std::vector<Model*>& models, const uint32_t HP) {
 	worldtransform_.translation_ = {0, 0, -500};
 }
 
-void Player::InCollision() {
+void Player::OnCollision() {
 	if (hp_-- <= 0) {
 		isDead_ = true;
 	}

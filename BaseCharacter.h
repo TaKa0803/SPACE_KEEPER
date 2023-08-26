@@ -2,6 +2,9 @@
 #include <Model.h>
 #include <WorldTransform.h>
 #include <vector>
+
+class GameScene;
+
 class BaseCharacter {
 protected:
 	// モデルデータ配列
@@ -12,6 +15,9 @@ protected:
 	uint32_t hp_;
 
 	bool isDead_;
+
+	// ゲームシーン
+	GameScene* gameScene_ = nullptr;
 
 public:
 	/// 初期化
@@ -25,5 +31,14 @@ public:
 
 	const WorldTransform& GetWorldTransform() { return worldtransform_; }
 
-	const bool& IsDead_(){return isDead_};
+	const Vector3 GetmatPos() {
+		return {
+		    worldtransform_.matWorld_.m[3][0], worldtransform_.matWorld_.m[3][1],
+		    worldtransform_.matWorld_.m[3][2]
+		};
+	}
+
+	const bool& IsDead() { return isDead_; };
+	// ゲームシーン
+	void SetgameScene(GameScene* gameScene) { gameScene_ = gameScene; }
 };

@@ -24,7 +24,8 @@ void Enemy::Draw(const ViewProjection& view) {
 	models_[0]->Draw(worldtransform_, view);
 }
 
-void Enemy::InCollision() {
+void Enemy::OnCollision() {
+	//hp0以下で
 	if (hp_-- <= 0) {
 		isDead_ = true;
 	}

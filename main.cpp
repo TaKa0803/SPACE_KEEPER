@@ -74,6 +74,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		input->Update();
 		// ゲームシーンの毎フレーム処理
 		gameScene->Update();
+		//当たり判定
+		gameScene->CheckAllCollision();
+		//弾など削除
+		gameScene->UpdateDelete();
+
 		// 軸表示の更新
 		axisIndicator->Update();
 		// ImGui受付終了
