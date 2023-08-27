@@ -8,7 +8,7 @@ void Core::Initialize(Model* model) {
 
 	world_.Initialize();
 	world_.translation_ = {0, 0, 0};
-	world_.scale_ = {50, 50, 50};
+	world_.scale_ = {10, 10, 10};
 
 	isdead_ = false;
 	hp_ = 1000;
@@ -26,7 +26,7 @@ void Core::Update() {
 
 
 
-	world_.rotation_.y += (1.0f / 120.0f) * 3.14f;
+	//world_.rotation_.y += (1.0f / 120.0f) * 3.14f;
 
 	world_.UpdateMatrix();
 }

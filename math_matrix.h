@@ -3,6 +3,12 @@
 #include <Vector3.h>
 #include<Vector2.h>
 
+Vector2 CheckRotateFromVelo(const Vector3& v);
+// エリア内にもどす（円形）
+bool SetAreaEllipse(const Vector2& center, Vector2& pos, const float area, Vector2& velo_);
+
+Vector2 Esing(const Vector2 zero, const Vector2 one, float t);
+
 #pragma region V2
 Vector2 AddV2(Vector2 v1, Vector2 v2);
 Vector2 SubV2(Vector2 v1, Vector2 v2);

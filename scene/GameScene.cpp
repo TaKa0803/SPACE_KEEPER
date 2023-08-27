@@ -31,30 +31,60 @@ void GameScene::Initialize() {
 void GameScene::LoadModel() {
 	baseModel_.reset(Model::Create());
 	sky_.reset(Model::CreateFromOBJ("sssssk"));
+	planeModel_.reset(Model::CreateFromOBJ("Plane"));
 
+	coreModel_.reset(Model::CreateFromOBJ("core"));
 
 	enemyModels_ = {baseModel_.get()};
+
+	pbody_.reset(Model::CreateFromOBJ("PBody"));
+	phead_.reset(Model::CreateFromOBJ("Phead"));
+	plhand_.reset(Model::CreateFromOBJ("PLhand"));
+	prhand_.reset(Model::CreateFromOBJ("PRhand"));
+	plleg_.reset(Model::CreateFromOBJ("PLleg"));
+	prleg_.reset(Model::CreateFromOBJ("PRleg"));
+	pweapon_.reset(Model::CreateFromOBJ("PWeapon"));
+
+
+	fire_.reset(Model::CreateFromOBJ("fire"));
+	jettpack_.reset(Model::CreateFromOBJ("jettpack"));
+
 }
 
 //クラスのロードまとめ
 void GameScene::LoadClass() {
-	std::vector<Model*> playerModels = {baseModel_.get()};
+	std::vector<Model*> playerModels = {pweapon_.get(), pbody_.get(),  phead_.get(), plhand_.get(),  prhand_.get(),  plleg_.get(),
+	                                    prleg_.get(),   jettpack_.get(), fire_.get()};
+	
+	// 巨大ボスのコア
+	core_ = std::make_unique<Core>();
+	core_->Initialize(coreModel_.get());
 
+	//プレイヤー
 	player_ = std::make_unique<Player>();
 	player_->Initialize(playerModels,10);
 	player_->SetgameScene(this);
-	
-	camera_ = std::make_unique<Camera>();
-	camera_->Initialize(baseModel_.get(), farZ);
-	camera_->SetTarget(&player_->GetWorldTransform());
-	player_->SetReticle(&camera_->GetreticleW());
+	//プレイヤーの移動の中心を設定
+	player_->SetParent(&core_->GetWorldTransform());
 
+	
+	//カメラ
+	camera_ = std::make_unique<Camera>();
+	//コアをターゲットにして初期化
+	camera_->Initialize(farZ,&player_->GetplayerBaseW());
+
+	
+	//スカイドーム
 	skydome_ = std::make_unique<Skydome>();
 	skydome_->Initialize(sky_.get(), farZ);
+	
+	//地面
+	plane_ = std::make_unique<Plane>();
+	plane_->Initialize(planeModel_.get(), &player_->GetWorldTransform());
 
-	core_ = std::make_unique<Core>();
-	core_->Initialize(baseModel_.get());
-
+	// 地面
+	plane_E = std::make_unique<Plane>();
+	plane_E->Initialize(planeModel_.get(), &core_->GetWorldTransform());
 }
 
 //画像ロード
@@ -105,38 +135,34 @@ void GameScene::EnemyPop() {
 
 //更新処理
 void GameScene::Update() { 
-	EnemyPop();
-
+	//EnemyPop();
 	skydome_->Update();
+	
+	//親子関係の親から順に更新
+
+	core_->Update();
+	plane_E->Update();
+	
+	player_->Update();
+	plane_->Update();
+	
+	
 	
 	camera_->Update();
 	view_.matView = camera_->GetView().matView;
 	view_.matProjection = camera_->GetView().matProjection;
 	view_.TransferMatrix();
 
-	player_->Update();
-
-	core_->Update();
-
 #pragma region 敵
 	for (Enemy* enemy : enemy_) {
 		enemy->Update();
 	}
-
-	
 #pragma endregion
-
-
-
-
-
 #pragma region 自分の弾更新
 	// 自分の弾の更新
 	for (PlayerBullet* bullet : playerbullets_) {
 		bullet->Update();
 	}
-
-	
 #pragma endregion
 
 
@@ -168,6 +194,17 @@ void GameScene::CheckAllCollision() {
 				// 弾の判定
 				bullet->OnCollision();
 			}
+		}
+	}
+#pragma endregion
+#pragma region 自分の弾とコアとの当たり判定
+	for (PlayerBullet* bullet : playerbullets_) {
+		Vector3 Bpos = bullet->GetWorldT();
+		if (CheckHitSphere(core_->GetmatW(), Bpos, 1, 1)) {
+			// 敵の当たり判定
+			core_->InCollision();
+			// 弾の判定
+			bullet->OnCollision();
 		}
 	}
 #pragma endregion
@@ -241,9 +278,11 @@ void GameScene::Draw() {
 }
 //モデルの描画
 void GameScene::DrawModel() { 
+	plane_->Draw(view_);
+	plane_E->Draw(view_);
+
 	skydome_->Draw(view_);
 	player_->Draw(view_);
-	camera_->Draw(view_);
 	core_->Draw(view_);
 
 	for (Enemy* enemy : enemy_) {

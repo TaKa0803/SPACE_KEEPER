@@ -3,21 +3,28 @@
 #include<Model.h>
 #include<Vector2.h>
 #include<Input.h>
+
+
 class Reticle {
 public:
 	void Initialize(Model*model,const WorldTransform&parent );
 
-	void Update(WorldTransform& world_);
+	void Update(float length);
 
 	void Draw(ViewProjection view);
 
 	const WorldTransform& GetRW() { return reticleWorld_; }
 
+	const Vector3 GetmatW() {
+		return {
+		    reticleWorld_.matWorld_.m[3][0], reticleWorld_.matWorld_.m[3][1],
+		    reticleWorld_.matWorld_.m[3][2]};
+	}
+
 private:
 #pragma region まとめ
-	void Move();
-	void CameraRotate(WorldTransform& world_);
-	void Back();
+	void Move(float length);
+
 #pragma endregion
 
 	// キー入力
@@ -28,35 +35,14 @@ private:
 	WorldTransform reticleWorld_;
 	Model* model_;
 
+	//移動量
 	const float moveNum = 1.0f;
 
 	// 制限範囲
-	const float area = 30;
-
-	const float pi = 3.14f;
-
-	// 回転量の最大値
-	const float kRotateTheta = (1.0f / 120.0f) * 3.14f;
-
+	const float area = 100;
 
 	//レティクル原点
 	const Vector3 NormalPos = {0, 0, 30};
-
-
-	//レティクルの戻る処理に使う
-	const Vector2 zeroP_ = {0, 0};
-
-	// レティクルを戻すときのベクトル
-	Vector2 maxBackVec_;
-
-	// レティクル戻る処理のフラグ
-	bool isBackRetcle_ = false;
-
-	// イージング用T
-	float easingT_ = 0;
-
-	// フレーム加算するイージング
-	const float addT_ = 1.0f / 60.0f;
 
 };
 

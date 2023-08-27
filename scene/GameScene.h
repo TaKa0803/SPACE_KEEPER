@@ -18,6 +18,8 @@
 #include <list>
 #include"Enemy.h"
 
+#include"Plane.h"
+
 /// <summary>
 /// ゲームシーン
 /// </summary>
@@ -86,20 +88,26 @@ private:
 	float farZ = 2000;
 
 	std::unique_ptr<Player> player_ = nullptr;
+	// プレイヤーの弾
+	std::list<PlayerBullet*> playerbullets_;
 
 	std::unique_ptr<Camera> camera_ = nullptr;
 
 	std::unique_ptr<Skydome> skydome_ = nullptr;
+
+	//地面
+	std::unique_ptr<Plane> plane_ = nullptr;
+	// 地面(敵
+	std::unique_ptr<Plane> plane_E = nullptr;
+
+
 
 	std::unique_ptr<Core> core_ = nullptr;
 
 	//敵
 	std::list<Enemy*> enemy_;
 
-
-	// プレイヤーの弾
-	std::list<PlayerBullet*> playerbullets_;
-
+	
 
 
 #pragma region モデル
@@ -108,8 +116,28 @@ private:
 	//天球
 	std::unique_ptr<Model> sky_ = nullptr;
 
-	std::vector<Model*> enemyModels_ ;
+	//コアのモデル
+	std::unique_ptr<Model> coreModel_ = nullptr;
 
+	//地面
+	std::unique_ptr<Model> planeModel_=nullptr;
+
+	std::vector<Model*> enemyModels_;
+
+
+	std::unique_ptr<Model> pbody_;
+	std::unique_ptr<Model> phead_;
+	std::unique_ptr<Model> plhand_;
+	std::unique_ptr<Model> prhand_;
+	std::unique_ptr<Model> plleg_;
+	std::unique_ptr<Model> prleg_;
+
+	std::unique_ptr<Model> pweapon_;
+
+	std::unique_ptr<Model> jettpack_;
+
+	std::unique_ptr<Model> fire_;
+	
 #pragma endregion
 
 

@@ -9,7 +9,8 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(Model* model, const Vector3& position, const Vector3& velocity);
+	void Initialize(
+	    Model* model, const Vector3& position, const Vector3& velocity, const Vector3& rotate);
 
 	/// <summary>
 	/// 　更新

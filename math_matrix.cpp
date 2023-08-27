@@ -2,8 +2,46 @@
 #include<Vector2.h>
 #include <cassert>
 #include <cmath>
+#include<iostream>
+
+Vector2 CheckRotateFromVelo(const Vector3& v) {
+	float length = LengV2({v.x,v.z});
+
+	return {       
+	    std::atan2(-v.y, length),
+	    std::atan2(v.x, v.z),
+	};
+}
 
 
+// エリア内にもどす（円形）引数のposの数字を変えて
+bool SetAreaEllipse(const Vector2& center, Vector2& pos, const float area,Vector2& velo_) {
+
+	Vector2 velo = SubV2(pos, center);
+	float length = LengV2(velo);
+
+	// 枠外で処理開始
+	if (length > area) {
+		// 長さを正規化して最大値まで伸ばす
+		velo = NorV2(velo);
+		pos= ScaV2(area,velo);
+
+		velo_ = velo;
+
+		
+		return true;
+	}
+	velo_ = {0, 0};
+
+	return false;
+}
+
+Vector2 Esing(const Vector2 zero, const Vector2 one, float t) {
+	return {
+	    zero.x * (1.0f - t) + one.x * t,
+	    zero.y * (1.0f - t) + one.y * t,
+	};
+}
 
 Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m) {
 	return {
