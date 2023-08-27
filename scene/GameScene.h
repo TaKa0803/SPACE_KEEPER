@@ -137,6 +137,11 @@ private:
 	std::unique_ptr<Model> jettpack_;
 
 	std::unique_ptr<Model> fire_;
+
+	std::unique_ptr<Model> pAmmo_;
+
+	std::unique_ptr<Model> eAmmo_;
+
 	
 #pragma endregion
 

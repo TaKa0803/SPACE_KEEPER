@@ -49,12 +49,14 @@ void GameScene::LoadModel() {
 	fire_.reset(Model::CreateFromOBJ("fire"));
 	jettpack_.reset(Model::CreateFromOBJ("jettpack"));
 
+	pAmmo_.reset(Model::CreateFromOBJ("ammo"));
+	eAmmo_.reset(Model::CreateFromOBJ("Eammo"));
 }
 
 //クラスのロードまとめ
 void GameScene::LoadClass() {
-	std::vector<Model*> playerModels = {pweapon_.get(), pbody_.get(),  phead_.get(), plhand_.get(),  prhand_.get(),  plleg_.get(),
-	                                    prleg_.get(),   jettpack_.get(), fire_.get()};
+	std::vector<Model*> playerModels = {pweapon_.get(), pbody_.get(),  phead_.get(), plhand_.get(),  prhand_.get(),  plleg_.get(), prleg_.get(), jettpack_.get(),
+	                                    fire_.get(),    pAmmo_.get()};
 	
 	// 巨大ボスのコア
 	core_ = std::make_unique<Core>();

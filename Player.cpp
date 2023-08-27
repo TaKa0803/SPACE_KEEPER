@@ -14,7 +14,7 @@ void Player::Initialize(const std::vector<Model*>& models, const uint32_t HP) {
 	playerMoveW.translation_ = {0, 0, -100};
 
 	targetW_.Initialize();
-	ammo = models_[0];
+	ammo = models_[9];
 
 	reticle_ = new Reticle();
 	reticle_->Initialize(models_[0], playerMoveW);
