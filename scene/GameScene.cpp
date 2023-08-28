@@ -51,6 +51,8 @@ void GameScene::LoadModel() {
 
 	pAmmo_.reset(Model::CreateFromOBJ("ammo"));
 	eAmmo_.reset(Model::CreateFromOBJ("Eammo"));
+	//タイトル	
+	titleModel_.reset(Model::CreateFromOBJ("Title"));
 }
 
 //クラスのロードまとめ
@@ -134,22 +136,20 @@ void GameScene::EnemyPop() {
 
 }
 
+void GameScene::TitlrUpdate() {
 
-//更新処理
-void GameScene::Update() { 
-	//EnemyPop();
+
+}
+
+void GameScene::InGameUpdate() {
 	skydome_->Update();
-	
-	//親子関係の親から順に更新
-
+	// 親子関係の親から順に更新
 	core_->Update();
 	plane_E->Update();
-	
+
 	player_->Update();
 	plane_->Update();
-	
-	
-	
+
 	camera_->Update();
 	view_.matView = camera_->GetView().matView;
 	view_.matProjection = camera_->GetView().matProjection;
@@ -167,7 +167,33 @@ void GameScene::Update() {
 	}
 #pragma endregion
 
+	CheckAllCollision();
 
+	UpdateDelete();
+
+}
+
+void GameScene::ClearUpdate() {
+
+
+}
+
+//更新処理
+void GameScene::Update() { 
+
+	switch (scene_) {
+	case Scene::Title:
+		TitlrUpdate();
+		break;
+	case Scene::InGame:
+		InGameUpdate();
+		break;
+	case Scene::Clear:
+		ClearUpdate();
+		break;
+	default:
+		break;
+	}
 }
 
 bool CheckHitSphere(const Vector3& v1, const Vector3& v2, float r1, float r2) {
@@ -205,8 +231,11 @@ void GameScene::CheckAllCollision() {
 		if (CheckHitSphere(core_->GetmatW(), Bpos, 1, 1)) {
 			// 敵の当たり判定
 			core_->InCollision();
+			
 			// 弾の判定
 			bullet->OnCollision();
+
+			
 		}
 	}
 #pragma endregion
@@ -278,22 +307,39 @@ void GameScene::Draw() {
 	Sprite::PostDraw();
 #pragma endregion
 }
+
+
+
+
+
+
+
 //モデルの描画
 void GameScene::DrawModel() { 
-	plane_->Draw(view_);
-	plane_E->Draw(view_);
+	switch (scene_) {
+	case Scene::Title:
+		break;
+	case Scene::InGame:
+		plane_->Draw(view_);
+		plane_E->Draw(view_);
+		skydome_->Draw(view_);
+		player_->Draw(view_);
+		core_->Draw(view_);
 
-	skydome_->Draw(view_);
-	player_->Draw(view_);
-	core_->Draw(view_);
+		for (Enemy* enemy : enemy_) {
+			enemy->Draw(view_);
+		}
 
-	for (Enemy* enemy : enemy_) {
-		enemy->Draw(view_);
+		for (PlayerBullet* bullet : playerbullets_) {
+			bullet->Draw(view_);
+		}
+		break;
+	case Scene::Clear:
+		break;
+	default:
+		break;
 	}
-
-	for (PlayerBullet* bullet : playerbullets_) {
-		bullet->Draw(view_);
-	}
+	
 }
 
 //スプライト描画

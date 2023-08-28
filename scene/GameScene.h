@@ -20,6 +20,17 @@
 
 #include"Plane.h"
 
+
+enum class Scene {
+	Title,
+	TitleToIngame,
+	InGame,
+	InGameToClear,
+	Clear,
+	BackTitle,
+};
+
+
 /// <summary>
 /// ゲームシーン
 /// </summary>
@@ -70,14 +81,19 @@ private:
 
 	void AddEnemy(Vector3 pos);
 
+	void TitlrUpdate();
+
+	void InGameUpdate();
 	
-	
+	void ClearUpdate();
 #pragma endregion
 	
 	// メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
+
+	Scene scene_ = Scene::Title;
 
 	/// <summary>
 	/// ゲームシーン用
@@ -142,7 +158,8 @@ private:
 
 	std::unique_ptr<Model> eAmmo_;
 
-	
+	std::unique_ptr<Model> titleModel_;
+
 #pragma endregion
 
 
