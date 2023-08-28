@@ -9,6 +9,7 @@ void Reticle::Initialize(Model* model, const WorldTransform& parent) {
 	
 	reticleWorld_.Initialize();
 	reticleWorld_.translation_ = NormalPos;
+	//reticleWorld_.scale_ = {1, 1, 10};
 	reticleWorld_.parent_ = &parent;
 
 	model_ = model;
@@ -17,6 +18,12 @@ void Reticle::Initialize(Model* model, const WorldTransform& parent) {
 
 
 void Reticle::Move(float length) {
+	float maxfar = 220;
+	//+ni
+	length = sqrtf(length * length);
+	//gap
+	float gap = length /maxfar;
+
 
 	//キー入力による移動
 	if (input_->PushKey(DIK_W)) {
@@ -31,25 +38,22 @@ void Reticle::Move(float length) {
 	if (input_->PushKey(DIK_D)) {
 		reticleWorld_.translation_.x += moveNum;
 	}
-
 	
-	//枠外に出てないかのチェック
-	Vector2 zero = {0, 0};
-	Vector2 retipos = {reticleWorld_.translation_.x, reticleWorld_.translation_.y};
-	Vector2 overvelo = {0, 0};
+	//max値
+	Vector3 Max = {
+		90.0f*gap,
+		70.0f*gap
+	};
 
-
+	reticleWorld_.translation_.x = min(reticleWorld_.translation_.x, Max.x);
+	reticleWorld_.translation_.x = max(reticleWorld_.translation_.x, -Max.x);
+	reticleWorld_.translation_.y = min(reticleWorld_.translation_.y, Max.y);
+	reticleWorld_.translation_.y = max(reticleWorld_.translation_.y, -Max.y);
 	
-	float checkArea = area * (length/200);
-
-	SetAreaEllipse(zero, retipos,	checkArea,overvelo);
-
-	// 伸ばした値を代入
-	reticleWorld_.translation_ = {retipos.x, retipos.y, reticleWorld_.translation_.z};
 }
 
 
-void Reticle::Update(float length) { 
+void Reticle::Update(float depth) { 
 	#ifdef _DEBUG
 	ImGui::Begin("Reticle");
 	ImGui::Text("pos :%4.1f/%4.1f/%4.1f", reticleWorld_.translation_.x, reticleWorld_.translation_.y,reticleWorld_.translation_.z);
@@ -58,13 +62,8 @@ void Reticle::Update(float length) {
 	ImGui::End();
 #endif // _DEBUG
 	
-	reticleWorld_.translation_.z = length;
-
-	//Back();
 	//移動処理
-	Move(length);
-	//カメラ回転処理
-	//CameraRotate(world_);
+	Move(depth);
 	
 	//行列更新
 	reticleWorld_.UpdateMatrix();

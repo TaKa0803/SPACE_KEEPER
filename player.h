@@ -31,6 +31,8 @@ public:
 
 	void OnCollision();
 
+	void TitleUpdate();
+
 private:
 #pragma region まとめ
 	void GetStatus();
@@ -45,6 +47,12 @@ private:
 	
 	const Vector3 GetTargetmatW() {
 		return {targetW_.matWorld_.m[3][0], targetW_.matWorld_.m[3][1], targetW_.matWorld_.m[3][2]};
+	}
+
+	const Vector3 GetplayerMovematW() {
+		return {
+		    playerMoveW.matWorld_.m[3][0], playerMoveW.matWorld_.m[3][1],
+		    playerMoveW.matWorld_.m[3][2]};
 	}
 
 	void Attack();
@@ -72,7 +80,7 @@ private:
 	const float moveNumN = 0.5f;
 
 	//移動制限
-	const float area = 4.0f;
+	const float area = 2.0f;
 
 	//半径
 	

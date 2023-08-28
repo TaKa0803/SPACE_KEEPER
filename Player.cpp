@@ -11,7 +11,7 @@ void Player::Initialize(const std::vector<Model*>& models, const uint32_t HP) {
 	
 	playerMoveW.Initialize();
 	//ターゲットとの距離（Z)
-	playerMoveW.translation_ = {0, 0, -100};
+	playerMoveW.translation_ = {0, 0, -50};
 
 	targetW_.Initialize();
 	ammo = models_[9];
@@ -35,8 +35,8 @@ void Player::Initialize(const std::vector<Model*>& models, const uint32_t HP) {
 	jettpack_.Initialize();
 	jettpack_.translation_ = {0, -0.1f, -0.64f};
 	fire_.Initialize();
-	fire_.translation_ = {0, -0.2f, 0};
-
+	fire_.translation_ = {0, -0.3f, 0};
+	fire_.scale_ = {0.8f, 1, 0.8f};
 	bodyW_.parent_ = &worldtransform_;
 	headW_.parent_ = &bodyW_;
 	LhandW_.parent_ = &bodyW_;
@@ -142,7 +142,7 @@ void Player::Move() {
 	ImGui::Text("pos   : %4.1f/%4.1f/%4.1f", playerMoveW.translation_.x, 0.01f);
 	ImGui::Text("rotate: %4.1f/%4.1f/%4.1f", playerMoveW.rotation_.x, 0.01f);
 	ImGui::Text("scale : %4.1f/%4.1f/%4.1f", playerMoveW.scale_.x, 0.01f);
-
+	
 	ImGui::Text("player stand area Move Normal");
 	ImGui::DragFloat3("rotate", &targetW_.rotation_.x, 0.01f);
 	ImGui::DragFloat("far to target", &playerMoveW.translation_.z);
@@ -176,9 +176,9 @@ void Player::Move() {
 	}
 
 	if (playerMoveW.translation_.z > -50) {
-		playerMoveW.translation_.z = 50;
+		playerMoveW.translation_.z = -50;
 	} else if (playerMoveW.translation_.z < -200) {
-		playerMoveW.translation_.z = 200;
+		playerMoveW.translation_.z = -200;
 	}
 
 	//行列更新
@@ -219,6 +219,8 @@ void Player::Move() {
 	bodyW_.rotation_.z = (worldtransform_.translation_.x/-area)*pi*(1.0f/6.0f);
 	bodyW_.rotation_.x = (worldtransform_.translation_.z / area) * pi * (1.0f / 10.0f);
 
+	fire_.rotation_.y += (1.0f / 30.0f) * pi;
+
 	bodyW_.UpdateMatrix();
 	headW_.UpdateMatrix();
 	LhandW_.UpdateMatrix();
@@ -237,16 +239,22 @@ void Player::Move() {
 /// </summary>
 void Player::Update() { 
 	GetStatus();
+	
+
 	//基準点の座標を取得
 	targetW_.translation_ = target_->translation_;
 #ifdef _DEBUG
 	ImGui::Begin("Player");
+
 #endif // _DEBUG
 
 	
 	Move();
 
-	float length = Length(Subtract(GetTargetmatW(), GetplayermatTranslate()));
+	//camera to fov
+	float length = playerMoveW.translation_.z+(-20);
+	//震度情報送る
+	reticle_->SetDepth(-playerMoveW.translation_.z);
 	reticle_->Update(length);
 
 	Attack();
@@ -258,7 +266,72 @@ void Player::Update() {
 	
 }
 
+void Player::TitleUpdate() {
 
+	GetStatus();
+#ifdef _DEBUG
+	ImGui::Begin("Player");
+	ImGui::Text("player");
+	ImGui::DragFloat3("position", &worldtransform_.translation_.x, 0.01f);
+	ImGui::DragFloat3("rotate", &worldtransform_.rotation_.x, 0.01f);
+	ImGui::DragFloat3("scale", &worldtransform_.scale_.x, 0.01f);
+
+	ImGui::Text("player stand area");
+	ImGui::Text("pos   : %4.1f/%4.1f/%4.1f", playerMoveW.translation_.x, 0.01f);
+	ImGui::Text("rotate: %4.1f/%4.1f/%4.1f", playerMoveW.rotation_.x, 0.01f);
+	ImGui::Text("scale : %4.1f/%4.1f/%4.1f", playerMoveW.scale_.x, 0.01f);
+
+	ImGui::Text("player stand area Move Normal");
+	ImGui::DragFloat3("rotate", &targetW_.rotation_.x, 0.01f);
+	ImGui::DragFloat("far to target", &playerMoveW.translation_.z);
+	ImGui::DragFloat3("pos", &playerMoveW.translation_.x, 0.01f);
+	;
+	ImGui::End();
+#endif // _DEBUG
+
+
+	// 距離は固定
+	playerMoveW.translation_.z = -10;
+
+	// 基準点の座標を取得
+	targetW_.translation_ = {0,0,-300.0f};
+
+	if (isShot) {
+		weaponW_.rotation_.x = 0.0f;
+		LhandW_.rotation_.x = 0.0f;
+		RhandW_.rotation_.x = 0.0f;
+	} else {
+		weaponW_.rotation_.x = 0.5f;
+		LhandW_.rotation_.x = 0.5f;
+		RhandW_.rotation_.x = 0.5f;
+	}
+	fire_.rotation_.y += (1.0f / 30.0f) * pi;
+
+	
+
+	// 行列更新
+	targetW_.UpdateMatrix();
+	playerMoveW.UpdateMatrix();
+	// playermoveを中心として移動
+	worldtransform_.UpdateMatrix();
+
+	bodyW_.UpdateMatrix();
+	headW_.UpdateMatrix();
+	LhandW_.UpdateMatrix();
+	RhandW_.UpdateMatrix();
+	LlegW_.UpdateMatrix();
+	RlegW_.UpdateMatrix();
+	weaponW_.UpdateMatrix();
+
+	jettpack_.UpdateMatrix();
+	fire_.UpdateMatrix();
+
+	//カメラからターゲットまでのZ
+	float length = playerMoveW.translation_.z + ( - 20);
+	reticle_->Update(length);
+
+	Attack();
+}
 
 /// <summary>
 /// 描画
@@ -285,10 +358,9 @@ void Player::Draw(const ViewProjection& view) {
 	//じぇっぱ
 	models_[7]->Draw(jettpack_, view);
 
+
 	if (! isShot) {
 		// 炎
 		models_[8]->Draw(fire_, view);
 	}
-	
-
 }

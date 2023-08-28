@@ -21,6 +21,8 @@ public:
 		    reticleWorld_.matWorld_.m[3][2]};
 	}
 
+	void SetDepth(float depth) { reticleWorld_.translation_.z = depth; }
+
 private:
 #pragma region まとめ
 	void Move(float length);

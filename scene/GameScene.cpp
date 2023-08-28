@@ -53,6 +53,7 @@ void GameScene::LoadModel() {
 	eAmmo_.reset(Model::CreateFromOBJ("Eammo"));
 	//タイトル	
 	titleModel_.reset(Model::CreateFromOBJ("Title"));
+	titleTileM_.reset(Model::CreateFromOBJ("TitleTile"));
 }
 
 //クラスのロードまとめ
@@ -89,6 +90,10 @@ void GameScene::LoadClass() {
 	// 地面
 	plane_E = std::make_unique<Plane>();
 	plane_E->Initialize(planeModel_.get(), &core_->GetWorldTransform());
+
+	//title
+	title_ = std::make_unique<TitleS>();
+	title_->Initialize(titleModel_.get(),titleTileM_.get());
 }
 
 //画像ロード
@@ -136,13 +141,25 @@ void GameScene::EnemyPop() {
 
 }
 
-void GameScene::TitlrUpdate() {
+void GameScene::TitlrUpdate() { 
+	title_->Update();
+	player_->TitleUpdate();
 
+	camera_->Update();
+	view_.matView = camera_->GetView().matView;
+	view_.matProjection = camera_->GetView().matProjection;
+	view_.TransferMatrix();
+
+	#pragma region 自分の弾更新
+	// 自分の弾の更新
+	for (PlayerBullet* bullet : playerbullets_) {
+		bullet->Update();
+	}
+#pragma endregion
 
 }
 
 void GameScene::InGameUpdate() {
-	skydome_->Update();
 	// 親子関係の親から順に更新
 	core_->Update();
 	plane_E->Update();
@@ -180,15 +197,16 @@ void GameScene::ClearUpdate() {
 
 //更新処理
 void GameScene::Update() { 
-
+	skydome_->Update();
+	
 	switch (scene_) {
-	case Scene::Title:
+	case GScene::Title:
 		TitlrUpdate();
 		break;
-	case Scene::InGame:
+	case GScene::InGame:
 		InGameUpdate();
 		break;
-	case Scene::Clear:
+	case GScene::Clear:
 		ClearUpdate();
 		break;
 	default:
@@ -317,9 +335,18 @@ void GameScene::Draw() {
 //モデルの描画
 void GameScene::DrawModel() { 
 	switch (scene_) {
-	case Scene::Title:
+	case GScene::Title:
+		title_->Draw(view_);
+		if (title_->GetScene() != Scene::start ||title_->GetScene() != Scene::startAnimation) {
+			//タイトルアニメーション終わってから描画
+			player_->Draw(view_);
+
+			for (PlayerBullet* bullet : playerbullets_) {
+				bullet->Draw(view_);
+			}
+		}
 		break;
-	case Scene::InGame:
+	case GScene::InGame:
 		plane_->Draw(view_);
 		plane_E->Draw(view_);
 		skydome_->Draw(view_);
@@ -334,7 +361,7 @@ void GameScene::DrawModel() {
 			bullet->Draw(view_);
 		}
 		break;
-	case Scene::Clear:
+	case GScene::Clear:
 		break;
 	default:
 		break;

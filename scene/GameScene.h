@@ -17,11 +17,11 @@
 #include"core.h"
 #include <list>
 #include"Enemy.h"
-
+#include"title.h"
 #include"Plane.h"
 
 
-enum class Scene {
+enum class GScene {
 	Title,
 	TitleToIngame,
 	InGame,
@@ -93,7 +93,7 @@ private:
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
 
-	Scene scene_ = Scene::Title;
+	GScene scene_ = GScene::InGame;
 
 	/// <summary>
 	/// ゲームシーン用
@@ -123,7 +123,7 @@ private:
 	//敵
 	std::list<Enemy*> enemy_;
 
-	
+	std::unique_ptr<TitleS> title_ = nullptr;
 
 
 #pragma region モデル
@@ -140,6 +140,7 @@ private:
 
 	std::vector<Model*> enemyModels_;
 
+	
 
 	std::unique_ptr<Model> pbody_;
 	std::unique_ptr<Model> phead_;
@@ -160,6 +161,7 @@ private:
 
 	std::unique_ptr<Model> titleModel_;
 
+	std::unique_ptr<Model> titleTileM_;
 #pragma endregion
 
 
