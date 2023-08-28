@@ -32,6 +32,7 @@ void Reticle::Move(float length) {
 	if (input_->PushKey(DIK_S)) {
 		reticleWorld_.translation_.y -= moveNum;
 	}
+	//右移動中左にレティクルが動かない
 	if (input_->PushKey(DIK_A)) {
 		reticleWorld_.translation_.x -= moveNum;
 	}
