@@ -8,13 +8,14 @@ void PlayerBullet::Initialize(
 	//textureHandle_ = TextureManager::Load("Green.png");
 	worldTransform_.Initialize();
 	worldTransform_.translation_ = position;
-	worldTransform_.scale_ = {0.5f, 0.5f, 2.5f};
+	worldTransform_.scale_ = {0.3f, 0.3f, 1.3f};
 	velocity_ = velocity;
 	worldTransform_.rotation_ = rotate;
 }
 
 void PlayerBullet::Update() {
 	worldTransform_.translation_ = Add(worldTransform_.translation_, velocity_);
+
 
 	// 時間経過でデス
 	if (--deathTimer_ <= 0) {

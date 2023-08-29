@@ -11,6 +11,10 @@ public:
 
 	ViewProjection GetView() { return view_; }
 
+	float Getfar() { return cameraWorld_.translation_.z; }
+
+	void Setfar(float Far) { cameraWorld_.translation_.z = Far; }
+
 private:
 	//カメラ本体
 	WorldTransform cameraWorld_;

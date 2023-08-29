@@ -2,6 +2,7 @@
 #include "TextureManager.h"
 #include <cassert>
 #include"math_matrix.h"
+#include<ImGuiManager.h>
 
 GameScene::GameScene() {}
 
@@ -61,6 +62,10 @@ void GameScene::LoadClass() {
 	std::vector<Model*> playerModels = {pweapon_.get(), pbody_.get(),  phead_.get(), plhand_.get(),  prhand_.get(),  plleg_.get(), prleg_.get(), jettpack_.get(),
 	                                    fire_.get(),    pAmmo_.get()};
 	
+	// title
+	title_ = std::make_unique<TitleS>();
+	title_->Initialize(titleModel_.get(), titleTileM_.get());
+
 	// 巨大ボスのコア
 	core_ = std::make_unique<Core>();
 	core_->Initialize(coreModel_.get());
@@ -70,14 +75,14 @@ void GameScene::LoadClass() {
 	player_->Initialize(playerModels,10);
 	player_->SetgameScene(this);
 	//プレイヤーの移動の中心を設定
-	player_->SetParent(&core_->GetWorldTransform());
-
+	//player_->SetParent(&core_->GetWorldTransform());
+	player_->SetParent(&title_->GetRW());
 	
 	//カメラ
 	camera_ = std::make_unique<Camera>();
 	//コアをターゲットにして初期化
 	camera_->Initialize(farZ,&player_->GetplayerBaseW());
-
+	camera_->Setfar(-10.0f);
 	
 	//スカイドーム
 	skydome_ = std::make_unique<Skydome>();
@@ -91,9 +96,7 @@ void GameScene::LoadClass() {
 	plane_E = std::make_unique<Plane>();
 	plane_E->Initialize(planeModel_.get(), &core_->GetWorldTransform());
 
-	//title
-	title_ = std::make_unique<TitleS>();
-	title_->Initialize(titleModel_.get(),titleTileM_.get());
+	
 }
 
 //画像ロード
@@ -113,37 +116,75 @@ void GameScene::AddEnemy(Vector3 pos) {
 	enemy_.push_back(enemy);
 }
 
-void GameScene::EnemyPop() {
-	//条件クリアで出現
-	if (input_->TriggerKey(DIK_0)) {
-		// 敵出現
-		Vector3 pos1 = {100, 100, 100};
-		Vector3 pos2 = {-100, 100, 100};
-		Vector3 pos3 = {100, 100, -100};
-		Vector3 pos4 = {-100, 100, -100};
-
-		Vector3 pos5 = {100, -100, 100};
-		Vector3 pos6 = {-100, -100, 100};
-		Vector3 pos7 = {100, -100, -100};
-		Vector3 pos8 = {-100, -100, -100};
-
-		AddEnemy(pos1);
-		AddEnemy(pos2);
-		AddEnemy(pos3);
-		AddEnemy(pos4);
-		AddEnemy(pos5);
-		AddEnemy(pos6);
-		AddEnemy(pos7);
-		AddEnemy(pos8);
-
+void GameScene::EndAnime() {
+	
+	reddy_ = title_->IsPlay();
+	if (!reddy_) {
+		//セット
+		player_->SetParent(&core_->GetWorldTransform());
+		player_->Setfar(-340);
+		et = 0;
+		camT = 0;
+		camNear = false;
+	} else {
 		
-	}
+		//移動
+		player_->EndUpdate(title_->IsPlay(),camera_->Getfar(),et);
+		
+		float cam;
+		if (!camNear) {
+			//カメラの距離設定
+			cam = (-10.0f) * (1.0f - camT) + (-30.0f) * camT;
+			// 1/3
+			camT += 1.0f / 40.0f;
+			if (camT >= 1.0f) {
+				camT = 0.0f;
+				camNear = true;
+			}
+		} else {
+			// カメラの距離設定
+			cam = (-30.0f) * (1.0f - camT) + (-20.0f) * camT;
+			//2/3
+			camT += 1.0f / 80.0f;
+			if (camT >= 1.0f) {
+				camT = 1.0f;
+			}
+		}
+		//設定
+		camera_->Setfar(cam);
 
+		et += (1.0f / 120.0f);
+		if (et > 1.0f) {
+			et = 1.0f;
+		}
+	}
+	if (et>=1.0f) {
+		scene_ = GScene::InGame;
+	}
+	
 }
 
 void GameScene::TitlrUpdate() { 
+	ImGui::Begin("game");
+	ImGui::DragFloat("t", &et, 0.01f);
+	ImGui::End();
+
 	title_->Update();
-	player_->TitleUpdate();
+	if (title_->GetScene() != Scene::start || title_->GetScene() != Scene::startAnimation&&title_->GetScene()!=Scene::endAnimation) {
+		plane_->Update();
+		player_->TitleUpdate(camera_->Getfar());
+
+		
+	}
+	if (title_->GetScene() == Scene::endAnimation) {
+		EndAnime();
+	}
+
+	if (title_->GetScene() != Scene::start && title_->GetScene() != Scene::startAnimation) {
+
+		plane_E->Update();
+		core_->Update();
+	}
 
 	camera_->Update();
 	view_.matView = camera_->GetView().matView;
@@ -156,8 +197,12 @@ void GameScene::TitlrUpdate() {
 		bullet->Update();
 	}
 #pragma endregion
-
+	if (input_->PushKey(DIK_0)) {
+		title_->OnCollision();
+	}
 }
+
+
 
 void GameScene::InGameUpdate() {
 	// 親子関係の親から順に更新
@@ -183,11 +228,11 @@ void GameScene::InGameUpdate() {
 		bullet->Update();
 	}
 #pragma endregion
-
 	CheckAllCollision();
 
-	UpdateDelete();
+	
 
+	
 }
 
 void GameScene::ClearUpdate() {
@@ -212,6 +257,8 @@ void GameScene::Update() {
 	default:
 		break;
 	}
+	
+	UpdateDelete();
 }
 
 bool CheckHitSphere(const Vector3& v1, const Vector3& v2, float r1, float r2) {
@@ -334,22 +381,31 @@ void GameScene::Draw() {
 
 //モデルの描画
 void GameScene::DrawModel() { 
+	//天球
+	skydome_->Draw(view_);
+
 	switch (scene_) {
 	case GScene::Title:
 		title_->Draw(view_);
 		if (title_->GetScene() != Scene::start ||title_->GetScene() != Scene::startAnimation) {
 			//タイトルアニメーション終わってから描画
+			plane_->Draw(view_);
 			player_->Draw(view_);
 
 			for (PlayerBullet* bullet : playerbullets_) {
 				bullet->Draw(view_);
-			}
+			}		
 		}
+		if (title_->GetScene() != Scene::start && title_->GetScene() != Scene::startAnimation) {
+			plane_E->Draw(view_);
+			core_->Draw(view_);
+		}
+		
 		break;
 	case GScene::InGame:
 		plane_->Draw(view_);
 		plane_E->Draw(view_);
-		skydome_->Draw(view_);
+		
 		player_->Draw(view_);
 		core_->Draw(view_);
 

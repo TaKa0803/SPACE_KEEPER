@@ -13,6 +13,13 @@ Vector2 CheckRotateFromVelo(const Vector3& v) {
 	};
 }
 
+Vector3 Esing(Vector3 st, Vector3 ed, float t) { 
+	return {
+		st.x * (1.0f - t) + ed.x * t, 
+	    st.y * (1.0f - t) + ed.y * t,
+	    st.z * (1.0f - t) + ed.z * t,
+	}; 
+}
 
 // エリア内にもどす（円形）引数のposの数字を変えて
 bool SetAreaEllipse(const Vector2& center, Vector2& pos, const float area,Vector2& velo_) {

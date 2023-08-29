@@ -11,7 +11,7 @@ void Camera::Initialize(float farZ, const WorldTransform* target) {
 	
 	cameraWorld_.Initialize();
 	// 注目アイテムと距離設定
-	cameraWorld_.translation_ = {0, 3, -20};
+	cameraWorld_.translation_ = {0, 0, -20};
 
 	//reticle_ =new Reticle();
 	//reticle_->Initialize(model, world_);

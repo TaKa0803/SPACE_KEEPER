@@ -8,10 +8,11 @@
 void Player::Initialize(const std::vector<Model*>& models, const uint32_t HP) { 
 	input_ = Input::GetInstance();
 	BaseCharacter::Initialize(models, HP);
-	
+	worldtransform_.translation_ = {0, -3.5f, 0};
+
 	playerMoveW.Initialize();
 	//ターゲットとの距離（Z)
-	playerMoveW.translation_ = {0, 0, -50};
+	playerMoveW.translation_ = {0, 0, -40.0f};
 
 	targetW_.Initialize();
 	ammo = models_[9];
@@ -51,11 +52,23 @@ void Player::Initialize(const std::vector<Model*>& models, const uint32_t HP) {
 }
 
 void Player::GetStatus() {
+	//過去フレームの状態取得
+	beforeIsShot = isShot;
+
 	if (input_->PushKey(DIK_SPACE)) {
 		isShot = true;
+		
 	} else {
 		isShot = false;
+		PushingCount_ = 0;
 	}
+
+	//おしっぱでカウント
+	if (isShot && beforeIsShot) {
+		//PushingCount_++;
+	}
+
+
 }
 
 void Player::SetParent(const WorldTransform* world) { 
@@ -78,8 +91,16 @@ void Player::OnCollision() {
 
 void Player::Attack() {
 	//スペースキーでレティクルに弾発射
-	if (input_->PushKey(DIK_SPACE)) {
-		
+	if (input_->PushKey(DIK_SPACE)&&canBulletShot_) {
+		if (++PushingCount_ > maxCount) {
+			PushingCount_ = maxCount;
+		}
+
+		//発射クールタイムを求める
+		canBulletShot_ = false;
+
+		shotcooltime_ = notShotT / PushingCount_;
+
 		Vector3 velocity = Subtract(reticle_->GetmatW(), GetplayermatTranslate());
 		
 		
@@ -89,13 +110,6 @@ void Player::Attack() {
 		Vector2 rt = CheckRotateFromVelo(velocity);
 		Vector3 rotate = {rt.x, rt.y, 0};
 
-#ifdef _DEBUG
-		ImGui::Text("velo %4.1f/%4.1f/%4.1f", velocity.x, velocity.y, velocity.z);
-		ImGui::Text("rotate %4.1f/%4.1f/%4.1f", rotate.x, rotate.y, rotate.z);
-
-#endif // _DEBUG
-
-
 		// 弾を生成して初期化
 		PlayerBullet* newBullet = new PlayerBullet();
 		newBullet->Initialize(ammo, GetplayermatTranslate(), velocity,rotate);
@@ -104,16 +118,58 @@ void Player::Attack() {
 	}
 }
 
+void Player::EndUpdate(bool ismove, float Clong, float et) { 
+	if (!canBulletShot_) {
+		if (--shotcooltime_ <= 0) {
+			shotcooltime_ = 0;
+			canBulletShot_ = true;
+		}
+	}
+
+	GetStatus();
+	// 基準点の座標を取得(y軸は除く
+	targetW_.translation_ = target_->translation_;
+
+
+	if (ismove) {
+		//前に進む
+		playerMoveW.translation_ = Esing(stP, edP, et);
+
+		weaponW_.rotation_.x = 0.5f;
+		LhandW_.rotation_.x = 0.5f;
+		RhandW_.rotation_.x = 0.5f;
+	
+
+		
+	}
+
+	
+	
+	fire_.rotation_.y += (1.0f / 30.0f) * pi;
+
+	// 行列更新まとめ
+	UpdateAllMatrix();
+
+	// カメラからターゲットまでのZ
+	float length = playerMoveW.translation_.z + Clong;
+	// 震度情報送る
+	reticle_->SetDepth(-playerMoveW.translation_.z);
+	reticle_->Update(length);
+
+}
 
 void Player::Move() {
 	
 	Vector3 move = {0, 0, 0};
 
-
 	float moveNum;
 
 	if (isShot) {
-		moveNum= moveNumN/2;
+		if (PushingCount_ != 0) {
+			moveNum = moveNumN/PushingCount_;
+		} else {
+			moveNum = moveNumN;
+		}
 	} else {
 		moveNum = moveNumN;
 	}
@@ -158,11 +214,18 @@ void Player::Move() {
 	if (SetAreaEllipse(zero, pos, area, overvelo)) {
 
 		if (isShot) {
-			// 左右移動
-			targetW_.rotation_.y -= overvelo.x * maxMoveTheta/2;
-			// 上下移動
-			playerMoveW.translation_.z += overvelo.y * moveNum/2;
-
+			
+			if (PushingCount_ != 0) {
+				// 左右移動
+				targetW_.rotation_.y -= overvelo.x * maxMoveTheta / PushingCount_;
+				// 上下移動
+				playerMoveW.translation_.z += overvelo.y * moveNum / PushingCount_;
+			} else {
+				// 左右移動
+				targetW_.rotation_.y -= overvelo.x * maxMoveTheta / 2;
+				// 上下移動
+				playerMoveW.translation_.z += overvelo.y * moveNum / 2;
+			}
 		} else {
 			// 左右移動
 			targetW_.rotation_.y -= overvelo.x * maxMoveTheta;
@@ -181,12 +244,7 @@ void Player::Move() {
 		playerMoveW.translation_.z = -200;
 	}
 
-	//行列更新
-	targetW_.UpdateMatrix();
-	playerMoveW.UpdateMatrix();
-	//playermoveを中心として移動
-	worldtransform_.UpdateMatrix();
-
+	
 
 #ifdef _DEBUG
 	ImGui::DragFloat3("head p", &headW_.rotation_.x, 0.01f);
@@ -202,7 +260,6 @@ void Player::Move() {
 
 	ImGui::DragFloat3("jett p " ,&jettpack_.translation_.x, 0.01f);
 	ImGui::DragFloat3("jett p ", &fire_.translation_.x, 0.01f);
-
 
 #endif // _DEBUG
 	if (isShot) {
@@ -221,42 +278,32 @@ void Player::Move() {
 
 	fire_.rotation_.y += (1.0f / 30.0f) * pi;
 
-	bodyW_.UpdateMatrix();
-	headW_.UpdateMatrix();
-	LhandW_.UpdateMatrix();
-	RhandW_.UpdateMatrix();
-	LlegW_.UpdateMatrix();
-	RlegW_.UpdateMatrix();
-	weaponW_.UpdateMatrix();
-
-	jettpack_.UpdateMatrix();
-	fire_.UpdateMatrix();
+	UpdateAllMatrix();
 
 }
 
 /// <summary>
 /// 更新
 /// </summary>
-void Player::Update() { 
+void Player::Update() {
+	if (!canBulletShot_) {
+		if (--shotcooltime_ <= 0) {
+			shotcooltime_ = 0;
+			canBulletShot_ = true;
+		}
+	}
 	GetStatus();
-	
-
 	//基準点の座標を取得
 	targetW_.translation_ = target_->translation_;
 #ifdef _DEBUG
 	ImGui::Begin("Player");
-
 #endif // _DEBUG
-
-	
 	Move();
-
 	//camera to fov
 	float length = playerMoveW.translation_.z+(-20);
 	//震度情報送る
 	reticle_->SetDepth(-playerMoveW.translation_.z);
 	reticle_->Update(length);
-
 	Attack();
 
 #ifdef _DEBUG
@@ -266,9 +313,18 @@ void Player::Update() {
 	
 }
 
-void Player::TitleUpdate() {
+//タイトルの時の更新
+void Player::TitleUpdate(float Clong) {
+	if (!canBulletShot_) {
+		if (--shotcooltime_ <= 0) {
+			shotcooltime_ = 0;
+			canBulletShot_ = true;
+		}
+	}
 
 	GetStatus();
+	// 基準点の座標を取得(y軸は除く
+	targetW_.translation_ = {target_->translation_.x,0,target_->translation_.z};
 #ifdef _DEBUG
 	ImGui::Begin("Player");
 	ImGui::Text("player");
@@ -285,17 +341,10 @@ void Player::TitleUpdate() {
 	ImGui::DragFloat3("rotate", &targetW_.rotation_.x, 0.01f);
 	ImGui::DragFloat("far to target", &playerMoveW.translation_.z);
 	ImGui::DragFloat3("pos", &playerMoveW.translation_.x, 0.01f);
-	;
+	
+	ImGui::Text("pushcount:canShot:shotcooltime / %d:%d:%d", PushingCount_,canBulletShot_,shotcooltime_);
 	ImGui::End();
 #endif // _DEBUG
-
-
-	// 距離は固定
-	playerMoveW.translation_.z = -10;
-
-	// 基準点の座標を取得
-	targetW_.translation_ = {0,0,-300.0f};
-
 	if (isShot) {
 		weaponW_.rotation_.x = 0.0f;
 		LhandW_.rotation_.x = 0.0f;
@@ -307,8 +356,20 @@ void Player::TitleUpdate() {
 	}
 	fire_.rotation_.y += (1.0f / 30.0f) * pi;
 
+	//行列更新まとめ
+	UpdateAllMatrix();
 	
+	//カメラからターゲットまでのZ
+	float length = playerMoveW.translation_.z + Clong;
+	// 震度情報送る
+	reticle_->SetDepth(-playerMoveW.translation_.z);
+	reticle_->Update(length);
 
+	Attack();
+}
+
+//行列更新まとめ
+void Player::UpdateAllMatrix() {
 	// 行列更新
 	targetW_.UpdateMatrix();
 	playerMoveW.UpdateMatrix();
@@ -325,12 +386,6 @@ void Player::TitleUpdate() {
 
 	jettpack_.UpdateMatrix();
 	fire_.UpdateMatrix();
-
-	//カメラからターゲットまでのZ
-	float length = playerMoveW.translation_.z + ( - 20);
-	reticle_->Update(length);
-
-	Attack();
 }
 
 /// <summary>

@@ -77,8 +77,7 @@ private:
 	void DrawModel();
 	void DrawSprite();
 
-	void EnemyPop();
-
+	
 	void AddEnemy(Vector3 pos);
 
 	void TitlrUpdate();
@@ -86,6 +85,9 @@ private:
 	void InGameUpdate();
 	
 	void ClearUpdate();
+
+
+	void EndAnime();
 #pragma endregion
 	
 	// メンバ変数
@@ -93,7 +95,7 @@ private:
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
 
-	GScene scene_ = GScene::InGame;
+	GScene scene_ = GScene::Title;
 
 	/// <summary>
 	/// ゲームシーン用
@@ -102,6 +104,14 @@ private:
 	ViewProjection view_;
 
 	float farZ = 2000;
+
+	bool reddy_ = false;
+
+	float et = 0;
+
+	float camT = 0;
+
+	bool camNear = false;
 
 	std::unique_ptr<Player> player_ = nullptr;
 	// プレイヤーの弾

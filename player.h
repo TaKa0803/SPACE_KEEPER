@@ -31,7 +31,13 @@ public:
 
 	void OnCollision();
 
-	void TitleUpdate();
+	void TitleUpdate(float Clong);
+
+	void EndUpdate(bool ismove, float Clong,float et);
+
+	void UpdateAllMatrix();
+
+	void Setfar(float Far) { playerMoveW.translation_.z = Far; }
 
 private:
 #pragma region まとめ
@@ -65,7 +71,17 @@ private:
 	Model* ammo = nullptr;
 	
 	// 弾の速度
-	const float kBulletSpeed = 10.0f;
+	const float kBulletSpeed = 1.0f;
+
+	bool canBulletShot_ = true;
+
+	uint32_t shotcooltime_ = 0;
+
+	const uint32_t notShotT = 30;
+
+	uint32_t PushingCount_ = 0;
+
+	const uint32_t maxCount = 10;
 
 	//攻撃するボスの座標のみ取得
 	const WorldTransform  *target_;
@@ -82,8 +98,11 @@ private:
 	//移動制限
 	const float area = 2.0f;
 
-	//半径
-	
+	//
+	Vector3 stP = {0,0,-340};
+
+	Vector3 edP = {0,0,-100};
+
 	//レティクル
 	Reticle* reticle_;
 
@@ -94,6 +113,7 @@ private:
 	
 	//発射している状態
 	bool isShot = false;
+	bool beforeIsShot = isShot;
 
 	WorldTransform bodyW_;
 	WorldTransform headW_;
