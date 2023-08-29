@@ -9,6 +9,7 @@ GameScene::GameScene() {}
 GameScene::~GameScene() {
 	for (PlayerBullet* bullet : playerbullets_) {
 		delete bullet;
+		bullet =nullptr;
 	}
 
 	for (Enemy* enemy : enemy_) {
@@ -59,8 +60,7 @@ void GameScene::LoadModel() {
 
 //クラスのロードまとめ
 void GameScene::LoadClass() {
-	std::vector<Model*> playerModels = {pweapon_.get(), pbody_.get(),  phead_.get(), plhand_.get(),  prhand_.get(),  plleg_.get(), prleg_.get(), jettpack_.get(),
-	                                    fire_.get(),    pAmmo_.get()};
+	std::vector<Model*> playerModels = {pweapon_.get(), pbody_.get(),  phead_.get(), plhand_.get(),  prhand_.get(),  plleg_.get(), prleg_.get(), jettpack_.get(), fire_.get(),  pAmmo_.get()};
 	
 	// title
 	title_ = std::make_unique<TitleS>();
@@ -117,7 +117,6 @@ void GameScene::AddEnemy(Vector3 pos) {
 }
 
 void GameScene::EndAnime() {
-	
 	reddy_ = title_->IsPlay();
 	if (!reddy_) {
 		//セット
@@ -125,10 +124,11 @@ void GameScene::EndAnime() {
 		player_->Setfar(-340);
 		et = 0;
 		camT = 0;
-		camNear = false;
+		camNear = false;	
 	} else {
 		
 		//移動
+		plane_->Update();
 		player_->EndUpdate(title_->IsPlay(),camera_->Getfar(),et);
 		
 		float cam;
@@ -170,36 +170,63 @@ void GameScene::TitlrUpdate() {
 	ImGui::End();
 
 	title_->Update();
-	if (title_->GetScene() != Scene::start || title_->GetScene() != Scene::startAnimation&&title_->GetScene()!=Scene::endAnimation) {
+	if (title_->GetScene() != Scene::endAnimation) {
 		plane_->Update();
 		player_->TitleUpdate(camera_->Getfar());
-
-		
 	}
+
 	if (title_->GetScene() == Scene::endAnimation) {
 		EndAnime();
 	}
 
-	if (title_->GetScene() != Scene::start && title_->GetScene() != Scene::startAnimation) {
-
+	//最初以外更新する
+	if (title_->GetScene() ==Scene::normal||title_->GetScene()==Scene::endAnimation) {
 		plane_E->Update();
 		core_->Update();
 	}
+
 
 	camera_->Update();
 	view_.matView = camera_->GetView().matView;
 	view_.matProjection = camera_->GetView().matProjection;
 	view_.TransferMatrix();
 
-	#pragma region 自分の弾更新
+#pragma region 自分の弾更新
 	// 自分の弾の更新
 	for (PlayerBullet* bullet : playerbullets_) {
 		bullet->Update();
 	}
 #pragma endregion
-	if (input_->PushKey(DIK_0)) {
-		title_->OnCollision();
+
+#pragma region 
+	// 当たり判定
+	if (!title_->IsPlay()) {
+		for (PlayerBullet* bullet : playerbullets_) {
+			
+				Vector3 Bpos = bullet->GetWorldT();
+
+				if (-20 <= Bpos.x && Bpos.x <= 20 && -10 <= Bpos.y && Bpos.y <= 10 &&
+				    -301 <= Bpos.z && Bpos.z <= -299) {
+					bullet->OnCollision();
+					title_->OnCollision();
+				}
+			
+		}
 	}
+#pragma endregion
+	
+
+
+	// 弾の時間経過削除
+	playerbullets_.remove_if([](PlayerBullet* bullet) {
+		if (bullet->IsDead()) {
+			delete bullet;
+			return true;
+		}
+		return false;
+	});
+
+
 }
 
 

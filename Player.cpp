@@ -18,7 +18,7 @@ void Player::Initialize(const std::vector<Model*>& models, const uint32_t HP) {
 	ammo = models_[9];
 
 	reticle_ = new Reticle();
-	reticle_->Initialize(models_[0], playerMoveW);
+	reticle_->Initialize(models_[9], playerMoveW);
 
 
 	bodyW_.Initialize();
@@ -55,19 +55,13 @@ void Player::GetStatus() {
 	//過去フレームの状態取得
 	beforeIsShot = isShot;
 
-	if (input_->PushKey(DIK_SPACE)) {
+
+	if (joyState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) {
 		isShot = true;
-		
-	} else {
+	}else {
 		isShot = false;
 		PushingCount_ = 0;
 	}
-
-	//おしっぱでカウント
-	if (isShot && beforeIsShot) {
-		//PushingCount_++;
-	}
-
 
 }
 
@@ -91,7 +85,8 @@ void Player::OnCollision() {
 
 void Player::Attack() {
 	//スペースキーでレティクルに弾発射
-	if (input_->PushKey(DIK_SPACE)&&canBulletShot_) {
+	if (joyState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER&&canBulletShot_) {
+		
 		if (++PushingCount_ > maxCount) {
 			PushingCount_ = maxCount;
 		}
@@ -174,19 +169,21 @@ void Player::Move() {
 		moveNum = moveNumN;
 	}
 
-	//移動処理
-	if (input_->PushKey(DIK_UP)) {
-		move.z += moveNum;
+	Vector2 moveV2 = {0, 0};
+
+	
+	if (Input::GetInstance()->GetJoystickState(0, joyState)) {
+		moveV2 = {
+		    (float)joyState.Gamepad.sThumbLX / SHRT_MAX,
+		    (float)joyState.Gamepad.sThumbLY / SHRT_MAX
+		};
+		moveV2 = ScaV2(moveNum, moveV2);
+
+		move.x = moveV2.x;
+		move.z = moveV2.y;
 	}
-	if (input_->PushKey(DIK_LEFT)) {
-		move.x -= moveNum;
-	}
-	if (input_->PushKey(DIK_DOWN)) {
-		move.z -= moveNum;
-	}
-	if (input_->PushKey(DIK_RIGHT)) {
-		move.x += moveNum;
-	}
+
+	
 
 #ifdef _DEBUG
 	ImGui::Text("player");
@@ -286,6 +283,8 @@ void Player::Move() {
 /// 更新
 /// </summary>
 void Player::Update() {
+	Input::GetInstance()->GetJoystickState(0, joyState);
+
 	if (!canBulletShot_) {
 		if (--shotcooltime_ <= 0) {
 			shotcooltime_ = 0;
@@ -315,6 +314,8 @@ void Player::Update() {
 
 //タイトルの時の更新
 void Player::TitleUpdate(float Clong) {
+	Input::GetInstance()->GetJoystickState(0, joyState);
+
 	if (!canBulletShot_) {
 		if (--shotcooltime_ <= 0) {
 			shotcooltime_ = 0;

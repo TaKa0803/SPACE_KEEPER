@@ -67,6 +67,9 @@ private:
 	// キー入力
 	Input* input_ = nullptr;
 
+	XINPUT_STATE joyState;
+	
+
 	//弾モデル
 	Model* ammo = nullptr;
 	
@@ -81,7 +84,7 @@ private:
 
 	uint32_t PushingCount_ = 0;
 
-	const uint32_t maxCount = 10;
+	const uint32_t maxCount = 8;
 
 	//攻撃するボスの座標のみ取得
 	const WorldTransform  *target_;

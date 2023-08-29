@@ -25,19 +25,17 @@ void Reticle::Move(float length) {
 	float gap = length /maxfar;
 
 
-	//キー入力による移動
-	if (input_->PushKey(DIK_W)) {
-		reticleWorld_.translation_.y += moveNum;
-	}
-	if (input_->PushKey(DIK_S)) {
-		reticleWorld_.translation_.y -= moveNum;
-	}
-	//右移動中左にレティクルが動かない
-	if (input_->PushKey(DIK_A)) {
-		reticleWorld_.translation_.x -= moveNum;
-	}
-	if (input_->PushKey(DIK_D)) {
-		reticleWorld_.translation_.x += moveNum;
+	Vector2 controll = {0, 0};
+
+	XINPUT_STATE joyState;
+	if (Input::GetInstance()->GetJoystickState(0, joyState)) {
+		controll = {
+			(float)joyState.Gamepad.sThumbRX/SHRT_MAX, 
+			(float)joyState.Gamepad.sThumbRY / SHRT_MAX
+		};
+		reticleWorld_.translation_.x += controll.x * moveNum;
+		reticleWorld_.translation_.y += controll.y * moveNum;
+
 	}
 	
 	//max値
@@ -60,6 +58,13 @@ void Reticle::Update(float depth) {
 	ImGui::Text("pos :%4.1f/%4.1f/%4.1f", reticleWorld_.translation_.x, reticleWorld_.translation_.y,reticleWorld_.translation_.z);
 	ImGui::Text("rotate :%4.1f/%4.1f/%4.1f", reticleWorld_.rotation_.x, reticleWorld_.rotation_.y,reticleWorld_.rotation_.z);
 	ImGui::Text("scale :%4.1f/%4.1f/%4.1f", reticleWorld_.scale_.x, reticleWorld_.scale_.y,reticleWorld_.scale_.z);
+	size_t a = input_->GetNumberOfJoysticks();
+	ImGui::Text("a %d", a);	
+	XINPUT_STATE joyState;
+	if (Input::GetInstance()->GetJoystickState(0, joyState)) {
+		ImGui::Text("%f/%f", (float)joyState.Gamepad.sThumbLX, (float)joyState.Gamepad.sThumbLY);
+		ImGui::Text("%f/%f", (float)joyState.Gamepad.sThumbRX, (float)joyState.Gamepad.sThumbRY);	
+	}
 	ImGui::End();
 #endif // _DEBUG
 	
