@@ -4,7 +4,6 @@
 #include"baseCharacter.h"
 #include<Input.h>
 #include<optional>
-#include"Glovalv.h"
 #include<Reticle.h>
 
 
@@ -25,6 +24,8 @@ public:
 	/// </summary>
 	void Draw(const ViewProjection& view) override;
 
+	void DrawUI();
+
 	const WorldTransform& GetplayerBaseW() { return playerMoveW; }
 
 	void SetParent(const WorldTransform *world);
@@ -42,12 +43,16 @@ public:
 
 	void SetStart();
 
+
+	void SetView(const ViewProjection* view) { reticle_->SetView(view); }
+
 private:
 #pragma region まとめ
 	void GetStatus();
 
 	void Move();
 
+	
 	const Vector3 GetplayermatTranslate() {
 		return {
 		    worldtransform_.matWorld_.m[3][0], worldtransform_.matWorld_.m[3][1],
@@ -131,5 +136,5 @@ private:
 
 	WorldTransform jettpack_;
 	WorldTransform fire_;
-
+	
 };

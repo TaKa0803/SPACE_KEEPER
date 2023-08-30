@@ -108,11 +108,7 @@ void Player::SetParent(const WorldTransform* world) {
 }
 
 
-void Player::OnCollision() {
-	if (hp_-- <= 0) {
-		isDead_ = true;
-	}
-}
+void Player::OnCollision() { canBulletShot_ = false; }
 
 void Player::Attack() {
 	//スペースキーでレティクルに弾発射
@@ -453,3 +449,5 @@ void Player::Draw(const ViewProjection& view) {
 		models_[8]->Draw(fire_, view);
 	}
 }
+
+void Player::DrawUI() { reticle_->DrawSPrite(); }

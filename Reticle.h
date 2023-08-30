@@ -3,7 +3,7 @@
 #include<Model.h>
 #include<Vector2.h>
 #include<Input.h>
-
+#include<Sprite.h>
 
 class Reticle {
 public:
@@ -12,6 +12,8 @@ public:
 	void Update(float length);
 
 	void Draw(ViewProjection view);
+
+	void DrawSPrite();
 
 	const WorldTransform& GetRW() { return reticleWorld_; }
 
@@ -23,15 +25,21 @@ public:
 
 	void SetDepth(float depth) { reticleWorld_.translation_.z = depth; }
 
+	void SetView(const ViewProjection* view) { view_ = view; }
+
 private:
 #pragma region まとめ
 	void Move(float length);
 
 #pragma endregion
 
+	const ViewProjection* view_;
+
 	// キー入力
 	Input* input_ = nullptr;
 
+	Sprite* R2D_ = nullptr;
+	
 
 	// レティクルのワールド
 	WorldTransform reticleWorld_;
@@ -47,6 +55,8 @@ private:
 	const Vector3 NormalPos = {0, 0, 30};
 
 	int tex_;
+
+	
 };
 
 

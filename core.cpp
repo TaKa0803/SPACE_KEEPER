@@ -2,6 +2,7 @@
 #include<cassert>
 #include<ImGuiManager.h>
 #include"math_matrix.h"
+#include<numbers>
 
 Vector3 ES(esing E, float t) {
 	return {
@@ -153,13 +154,14 @@ void BCore::Start() {
 void BCore::StartAnime() {
 switch (MoveWave_) {
 	case MoveE::attackWait:
-		//初期設定したか
+#pragma region atkWait
+		// 初期設定したか
 		if (!firstAction_) {
 			firstAction_ = true;
 			weakC = WeakCore::None;
 			// 攻撃予備動作
 			T = 0;
-			
+
 			H_ = {
 			    head_.rotation_, {-0.2f, 0, 0}
             };
@@ -188,16 +190,16 @@ switch (MoveWave_) {
 			    C_R2_.rotation_, {-3.0f, 0, 0.4f}
             };
 		} else {
-			//設定したら更新
+			// 設定したら更新
 			head_.rotation_ = ES(H_, T);
-			body_.rotation_ = ES(B_,T);
+			body_.rotation_ = ES(B_, T);
 			leg_.rotation_ = ES(Leg_, T);
 			LArm1_.rotation_ = ES(LA1_, T);
 			LArm2_.rotation_ = ES(LA2_, T);
 			Lhand_.rotation_ = ES(LH_, T);
 
 			RArm1_.rotation_ = ES(RA1_, T);
-			RArm2_.rotation_ = ES(RA2_,T);
+			RArm2_.rotation_ = ES(RA2_, T);
 			Rhand_.rotation_ = ES(RH_, T);
 
 			C_center_.rotation_ = ES(CC, T);
@@ -209,16 +211,16 @@ switch (MoveWave_) {
 			// T追加
 			T += addWaitT;
 			if (T > 1.0f) {
-				T = 1.0f;
-
+				T = 0;
 				// 次のシーンに移動
 				firstAction_ = false;
 				MoveWave_ = MoveE::attack;
 			}
-
 		}
+#pragma endregion	
 		break;
 	case MoveE::attack:
+#pragma region attack
 		if (!firstAction_) {
 			firstAction_ = true;
 			// 攻撃予備動作
@@ -226,7 +228,9 @@ switch (MoveWave_) {
 			H_ = {
 			    head_.rotation_, {-0.2f, 0, 0}
             };
-			B_ = {body_.rotation_, {-0.2f,0,0}};
+			B_ = {
+			    body_.rotation_, {-0.2f, 0, 0}
+            };
 			Leg_ = {leg_.rotation_, leg_.rotation_};
 			LA1_ = {LArm1_.rotation_, LArm1_.rotation_};
 			LA2_ = {LArm2_.rotation_, LArm2_.rotation_};
@@ -236,7 +240,9 @@ switch (MoveWave_) {
 			RA2_ = {RArm2_.rotation_, RArm2_.rotation_};
 			RH_ = {Rhand_.rotation_, Rhand_.rotation_};
 
-			CC = {C_center_.rotation_, {0.3f,0,0}};
+			CC = {
+			    C_center_.rotation_, {0.3f, 0, 0}
+            };
 			CL1_ = {
 			    C_L1_.rotation_, {0, -0.1f, 0.2f}
             };
@@ -274,24 +280,22 @@ switch (MoveWave_) {
 			// T追加
 			T += addAttackT;
 			if (T > 1.0f) {
-				T = 1.0f;
-
+				T = 0;
 				// 次のシーンに移動
 				firstAction_ = false;
 				MoveWave_ = MoveE::back;
 			}
 		}
+#pragma endregion	
 		break;
 	case MoveE::back:
+#pragma region back
 		if (!firstAction_) {
 			firstAction_ = true;
 			// 攻撃予備動作
 			T = 0;
-			H_ = {
-			    head_.rotation_, NorRotate_.H
-            };
-			B_ = {body_.rotation_, NorRotate_.B
-            };
+			H_ = {head_.rotation_, NorRotate_.H};
+			B_ = {body_.rotation_, NorRotate_.B};
 			Leg_ = {leg_.rotation_, NorRotate_.leg};
 			LA1_ = {LArm1_.rotation_, NorRotate_.LA1};
 			LA2_ = {LArm2_.rotation_, NorRotate_.LA2};
@@ -301,20 +305,172 @@ switch (MoveWave_) {
 			RA2_ = {RArm2_.rotation_, NorRotate_.RA2};
 			RH_ = {Rhand_.rotation_, NorRotate_.Rha};
 
-			CC = {C_center_.rotation_, NorRotate_.CC
-            };
+			CC = {C_center_.rotation_, NorRotate_.CC};
+			CL1_ = {C_L1_.rotation_, NorRotate_.CL1};
+			CL2_ = {C_L2_.rotation_, NorRotate_.CL2};
+
+			CR1_ = {C_R1_.rotation_, NorRotate_.CR1};
+			CR2_ = {C_R2_.rotation_, NorRotate_.CR2};
+		} else {
+			// 設定したら更新
+			head_.rotation_ = ES(H_, T);
+			body_.rotation_ = ES(B_, T);
+			leg_.rotation_ = ES(Leg_, T);
+			LArm1_.rotation_ = ES(LA1_, T);
+			LArm2_.rotation_ = ES(LA2_, T);
+			Lhand_.rotation_ = ES(LH_, T);
+
+			RArm1_.rotation_ = ES(RA1_, T);
+			RArm2_.rotation_ = ES(RA2_, T);
+			Rhand_.rotation_ = ES(RH_, T);
+
+			C_center_.rotation_ = ES(CC, T);
+			C_L1_.rotation_ = ES(CL1_, T);
+			C_L2_.rotation_ = ES(CL2_, T);
+			C_R1_.rotation_ = ES(CR1_, T);
+			C_R2_.rotation_ = ES(CR2_, T);
+
+			// T追加
+			T += addAttackT;
+			if (T > 1.0f) {
+
+				// Normalにする
+				T = 0;
+				firstAction_ = false;
+				MoveWave_ = MoveE::attackWait;
+				// シーン変換
+				state_ = StateCore::Normal;
+				weakC = WeakCore::center_;
+			}
+		}
+#pragma endregion	
+		break;
+	default:
+		break;
+	}
+}
+
+
+void BCore::Normal() { 
+	switch (ATKType) {
+	case ATKtype::Eye_Layzer:
+		EyeLayzer();
+		break;
+	case ATKtype::Punch_missiles:
+		Punch_M();
+		break;
+	case ATKtype::Beam:
+		Beam();
+		break;
+	case ATKtype::Armswinging:
+		ArmSwing();
+		break;
+	case ATKtype::ChaseBullet:
+		ChaseBullet();
+		break;
+	case ATKtype::None:
+		//何もしない
+		if (--nextATKCount <= 0) {
+			//アクションを起こす
+			int num = GetRandomNum(15, false);
+
+			//ランダムで行動
+			if (num == 0) {
+				ATKType = ATKtype::Eye_Layzer;
+			}
+			if (num == 1) {
+				ATKType = ATKtype::Eye_Layzer;
+			}
+			if (num == 2) {
+				ATKType = ATKtype::Eye_Layzer;
+			}
+			if (num == 3) {
+				ATKType = ATKtype::Punch_missiles;
+			}
+			if (num == 4) {
+				ATKType = ATKtype::Punch_missiles;
+			}
+			if (num == 5) {
+				ATKType = ATKtype::Punch_missiles;
+			}
+			if (num == 6) {
+				ATKType = ATKtype::Armswinging;
+			}
+			if (num == 7) {
+				ATKType = ATKtype::Armswinging;
+			}
+			if (num == 8) {
+				ATKType = ATKtype::Beam;
+			}
+			if (num == 9) {
+				ATKType = ATKtype::None;
+				nextATKCount = maxATKWait;
+			}
+
+			if (num == 10) {
+				ATKType = ATKtype::ChaseBullet;
+			}
+			if (num == 11) {
+				ATKType = ATKtype::ChaseBullet;
+			}
+			if (num == 12) {
+				ATKType = ATKtype::ChaseBullet;
+			}
+			if (num == 13) {
+				ATKType = ATKtype::ChaseBullet;
+			}
+			if (num == 14) {
+				ATKType = ATKtype::ChaseBullet;
+			}
+			ATKType = ATKtype::ChaseBullet;
+
+			SeeTarget();
+			//フラグ処理の初期化
+			firstAction_ = false;
+			T = 0;
+			MoveWave_ = MoveE::attackWait;
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+
+void BCore::EyeLayzer() {
+	switch (MoveWave_) {
+	case MoveE::attackWait:
+#pragma region atkWait
+		if (!firstAction_) {
+			firstAction_ = true;
+			// 攻撃予備動作
+			T = 0;
+
+			H_ = {head_.rotation_, head_.rotation_};
+			B_ = {body_.rotation_, body_.rotation_};
+			Leg_ = {leg_.rotation_, leg_.rotation_};
+			LA1_ = {LArm1_.rotation_, LArm1_.rotation_};
+			LA2_ = {LArm2_.rotation_, LArm2_.rotation_};
+			LH_ = {Lhand_.rotation_, Lhand_.rotation_};
+
+			RA1_ = {RArm1_.rotation_, RArm1_.rotation_};
+			RA2_ = {RArm2_.rotation_, RArm2_.rotation_};
+			RH_ = {Rhand_.rotation_, Rhand_.rotation_};
+
+			CC = {C_center_.rotation_, C_center_.rotation_};
+
 			CL1_ = {
-			    C_L1_.rotation_, NorRotate_.CL1
+			    C_L1_.rotation_, {0, 1, 0.4f}
             };
 			CL2_ = {
-			    C_L2_.rotation_, NorRotate_.CL2
+			    C_L2_.rotation_, {0, 2, 0}
             };
 
 			CR1_ = {
-			    C_R1_.rotation_, NorRotate_.CR1
+			    C_R1_.rotation_, {0, -1, -0.24f}
             };
 			CR2_ = {
-			    C_R2_.rotation_, NorRotate_.CR2
+			    C_R2_.rotation_, {0, -2, 0}
             };
 		} else {
 			// 設定したら更新
@@ -340,30 +496,957 @@ switch (MoveWave_) {
 			if (T > 1.0f) {
 				T = 1.0f;
 
+				// 次のアニメーションへ
+				T = 0;
+				firstAction_ = false;
+				MoveWave_ = MoveE::attack;
+			}
+		}
+#pragma endregion		
+		SeeTarget();
+		break;
+	case MoveE::attack:
+#pragma region atk
+		if (!firstAction_) {
+			firstAction_ = true;
+			// 攻撃予備動作
+			T = 0;
+
+			H_ = {head_.rotation_, head_.rotation_};
+			B_ = {body_.rotation_, body_.rotation_};
+			Leg_ = {leg_.rotation_, leg_.rotation_};
+			LA1_ = {LArm1_.rotation_, LArm1_.rotation_};
+			LA2_ = {LArm2_.rotation_, LArm2_.rotation_};
+			LH_ = {Lhand_.rotation_, Lhand_.rotation_};
+
+			RA1_ = {RArm1_.rotation_, RArm1_.rotation_};
+			RA2_ = {RArm2_.rotation_, RArm2_.rotation_};
+			RH_ = {Rhand_.rotation_, Rhand_.rotation_};
+
+			CC = {C_center_.rotation_, C_center_.rotation_};
+
+			CL1_ = {
+			    C_L1_.rotation_, {0, -0.5f, 0.2f}
+            };
+			CL2_ = {
+			    C_L2_.rotation_, {0, 1.5f, 0}
+            };
+
+			CR1_ = {
+			    C_R1_.rotation_, {0, 0.5f, -0.2f}
+            };
+			CR2_ = {
+			    C_R2_.rotation_, {0, -1.5f, 0}
+            };
+		} else {
+			// 設定したら更新
+			head_.rotation_ = ES(H_, T);
+			body_.rotation_ = ES(B_, T);
+			leg_.rotation_ = ES(Leg_, T);
+			LArm1_.rotation_ = ES(LA1_, T);
+			LArm2_.rotation_ = ES(LA2_, T);
+			Lhand_.rotation_ = ES(LH_, T);
+
+			RArm1_.rotation_ = ES(RA1_, T);
+			RArm2_.rotation_ = ES(RA2_, T);
+			Rhand_.rotation_ = ES(RH_, T);
+
+			C_center_.rotation_ = ES(CC, T);
+			C_L1_.rotation_ = ES(CL1_, T);
+			C_L2_.rotation_ = ES(CL2_, T);
+			C_R1_.rotation_ = ES(CR1_, T);
+			C_R2_.rotation_ = ES(CR2_, T);
+
+			// T追加
+			T += addAttackT;
+			if (T > 1.0f) {
+				T = 0;
+				firstAction_ = false;
+				// 次のアニメーションへ
+				MoveWave_ = MoveE::back;
+			}
+		}
+#pragma endregion	
+		break;
+	case MoveE::back:
+#pragma region back
+		if (!firstAction_) {
+			firstAction_ = true;
+			// 攻撃予備動作
+			T = 0;
+			H_ = {head_.rotation_, NorRotate_.H};
+			B_ = {body_.rotation_, NorRotate_.B};
+			Leg_ = {leg_.rotation_, NorRotate_.leg};
+			LA1_ = {LArm1_.rotation_, NorRotate_.LA1};
+			LA2_ = {LArm2_.rotation_, NorRotate_.LA2};
+			LH_ = {Lhand_.rotation_, NorRotate_.Lha};
+
+			RA1_ = {RArm1_.rotation_, NorRotate_.RA1};
+			RA2_ = {RArm2_.rotation_, NorRotate_.RA2};
+			RH_ = {Rhand_.rotation_, NorRotate_.Rha};
+
+			CC = {C_center_.rotation_, NorRotate_.CC};
+			CL1_ = {C_L1_.rotation_, NorRotate_.CL1};
+			CL2_ = {C_L2_.rotation_, NorRotate_.CL2};
+
+			CR1_ = {C_R1_.rotation_, NorRotate_.CR1};
+			CR2_ = {C_R2_.rotation_, NorRotate_.CR2};
+		} else {
+			// 設定したら更新
+			head_.rotation_ = ES(H_, T);
+			body_.rotation_ = ES(B_, T);
+			leg_.rotation_ = ES(Leg_, T);
+			LArm1_.rotation_ = ES(LA1_, T);
+			LArm2_.rotation_ = ES(LA2_, T);
+			Lhand_.rotation_ = ES(LH_, T);
+
+			RArm1_.rotation_ = ES(RA1_, T);
+			RArm2_.rotation_ = ES(RA2_, T);
+			Rhand_.rotation_ = ES(RH_, T);
+
+			C_center_.rotation_ = ES(CC, T);
+			C_L1_.rotation_ = ES(CL1_, T);
+			C_L2_.rotation_ = ES(CL2_, T);
+			C_R1_.rotation_ = ES(CR1_, T);
+			C_R2_.rotation_ = ES(CR2_, T);
+
+			// T追加
+			T += addAttackT;
+			if (T > 1.0f) {
+
 				// Normalにする
 				T = 0;
 				firstAction_ = false;
 				MoveWave_ = MoveE::attackWait;
-				//シーン変換
-				state_ = StateCore::Normal;
-				weakC = WeakCore::center_;
+				// シーン変換
+				ATKType = ATKtype::None;
+				nextATKCount = maxATKWait;
 			}
 		}
+#pragma endregion	
 		break;
 	default:
 		break;
 	}
 }
 
-void BCore::Normal() { 
-	SeeTarget();
+void BCore::Punch_M() {
+	switch (MoveWave_) {
+	case MoveE::attackWait:
+#pragma region atkWait
+		if (!firstAction_) {
+			firstAction_ = true;
+			// 攻撃予備動作
+			T = 0;
+
+			H_ = {head_.rotation_, head_.rotation_};
+			B_ = {body_.rotation_, body_.rotation_};
+			Leg_ = {leg_.rotation_, leg_.rotation_};
+			LA1_ = {LArm1_.rotation_, LArm1_.rotation_};
+			LA2_ = {LArm2_.rotation_, LArm2_.rotation_};
+			LH_ = {Lhand_.rotation_, Lhand_.rotation_};
+
+			RA1_ = {RArm1_.rotation_, RArm1_.rotation_};
+			RA2_ = {RArm2_.rotation_, RArm2_.rotation_};
+			RH_ = {Rhand_.rotation_, Rhand_.rotation_};
+
+			CC = {C_center_.rotation_, C_center_.rotation_};
+
+			CL1_ = {
+			    C_L1_.rotation_, {0, 1.4f, 0}
+            };
+			CL2_ = {
+			    C_L2_.rotation_, {0, 1.7f, 0}
+            };
+
+			CR1_ = {
+			    C_R1_.rotation_, {0, -1.43f, 0}
+            };
+			CR2_ = {
+			    C_R2_.rotation_, {0, -0.2f, 0}
+            };
+		} else {
+			// 設定したら更新
+			head_.rotation_ = ES(H_, T);
+			body_.rotation_ = ES(B_, T);
+			leg_.rotation_ = ES(Leg_, T);
+			LArm1_.rotation_ = ES(LA1_, T);
+			LArm2_.rotation_ = ES(LA2_, T);
+			Lhand_.rotation_ = ES(LH_, T);
+
+			RArm1_.rotation_ = ES(RA1_, T);
+			RArm2_.rotation_ = ES(RA2_, T);
+			Rhand_.rotation_ = ES(RH_, T);
+
+			C_center_.rotation_ = ES(CC, T);
+			C_L1_.rotation_ = ES(CL1_, T);
+			C_L2_.rotation_ = ES(CL2_, T);
+			C_R1_.rotation_ = ES(CR1_, T);
+			C_R2_.rotation_ = ES(CR2_, T);
+
+			// T追加
+			T += addAttackT/2;
+			if (T > 1.0f) {
+				T = 1.0f;
+
+				// 次のアニメーションへ
+				T = 0;
+				firstAction_ = false;
+				MoveWave_ = MoveE::attack;
+			}
+		}
+#pragma endregion
+		SeeTarget();
+		break;
+	case MoveE::attack:
+#pragma region atk
+		if (!firstAction_) {
+			firstAction_ = true;
+			// 攻撃予備動作
+			T = 0;
+
+			H_ = {head_.rotation_, head_.rotation_};
+			B_ = {body_.rotation_, body_.rotation_};
+			Leg_ = {leg_.rotation_, leg_.rotation_};
+			LA1_ = {LArm1_.rotation_, LArm1_.rotation_};
+			LA2_ = {LArm2_.rotation_, LArm2_.rotation_};
+			LH_ = {Lhand_.rotation_, Lhand_.rotation_};
+
+			RA1_ = {RArm1_.rotation_, RArm1_.rotation_};
+			RA2_ = {RArm2_.rotation_, RArm2_.rotation_};
+			RH_ = {Rhand_.rotation_, Rhand_.rotation_};
+
+			CC = {C_center_.rotation_, C_center_.rotation_};
+
+			CL1_ = {
+			    C_L1_.rotation_, {0, 1, 0}
+            };
+			CL2_ = {
+			    C_L2_.rotation_, {0, 2, 0}
+            };
+
+			CR1_ = {
+			    C_R1_.rotation_, {0, -1, 0}
+            };
+			CR2_ = {
+			    C_R2_.rotation_, {0, -0.55f, 0}
+            };
+
+			Rhand_.scale_ = {0, 0, 0};
+		} else {
+			// 設定したら更新
+			head_.rotation_ = ES(H_, T);
+			body_.rotation_ = ES(B_, T);
+			leg_.rotation_ = ES(Leg_, T);
+			LArm1_.rotation_ = ES(LA1_, T);
+			LArm2_.rotation_ = ES(LA2_, T);
+			Lhand_.rotation_ = ES(LH_, T);
+
+			RArm1_.rotation_ = ES(RA1_, T);
+			RArm2_.rotation_ = ES(RA2_, T);
+			Rhand_.rotation_ = ES(RH_, T);
+
+			C_center_.rotation_ = ES(CC, T);
+			C_L1_.rotation_ = ES(CL1_, T);
+			C_L2_.rotation_ = ES(CL2_, T);
+			C_R1_.rotation_ = ES(CR1_, T);
+			C_R2_.rotation_ = ES(CR2_, T);
+
+			// T追加
+			T += addAttackT*2;
+			if (T > 1.0f) {
+				T = 0;
+				firstAction_ = false;
+				// 次のアニメーションへ
+				MoveWave_ = MoveE::back;
+			}
+		}
+#pragma endregion
+		break;
+	case MoveE::back:
+#pragma region back
+		if (!firstAction_) {
+			firstAction_ = true;
+			// 攻撃予備動作
+			T = 0;
+			H_ = {head_.rotation_, NorRotate_.H};
+			B_ = {body_.rotation_, NorRotate_.B};
+			Leg_ = {leg_.rotation_, NorRotate_.leg};
+			LA1_ = {LArm1_.rotation_, NorRotate_.LA1};
+			LA2_ = {LArm2_.rotation_, NorRotate_.LA2};
+			LH_ = {Lhand_.rotation_, NorRotate_.Lha};
+
+			RA1_ = {RArm1_.rotation_, NorRotate_.RA1};
+			RA2_ = {RArm2_.rotation_, NorRotate_.RA2};
+			RH_ = {Rhand_.rotation_, NorRotate_.Rha};
+
+			CC = {C_center_.rotation_, NorRotate_.CC};
+			CL1_ = {C_L1_.rotation_, NorRotate_.CL1};
+			CL2_ = {C_L2_.rotation_, NorRotate_.CL2};
+
+			CR1_ = {C_R1_.rotation_, NorRotate_.CR1};
+			CR2_ = {C_R2_.rotation_, NorRotate_.CR2};
+
+			Stock1_ = {Rhand_.scale_, {1, 1, 1}};
+		} else {
+			// 設定したら更新
+			head_.rotation_ = ES(H_, T);
+			body_.rotation_ = ES(B_, T);
+			leg_.rotation_ = ES(Leg_, T);
+			LArm1_.rotation_ = ES(LA1_, T);
+			LArm2_.rotation_ = ES(LA2_, T);
+			Lhand_.rotation_ = ES(LH_, T);
+
+			RArm1_.rotation_ = ES(RA1_, T);
+			RArm2_.rotation_ = ES(RA2_, T);
+			Rhand_.rotation_ = ES(RH_, T);
+
+			C_center_.rotation_ = ES(CC, T);
+			C_L1_.rotation_ = ES(CL1_, T);
+			C_L2_.rotation_ = ES(CL2_, T);
+			C_R1_.rotation_ = ES(CR1_, T);
+			C_R2_.rotation_ = ES(CR2_, T);
+
+			Rhand_.scale_ = ES(Stock1_, T);
+			// T追加
+			T += addAttackT;
+			if (T > 1.0f) {
+				Rhand_.scale_ = {1, 1, 1};
+				// Normalにする
+				T = 0;
+				firstAction_ = false;
+				MoveWave_ = MoveE::attackWait;
+				// シーン変換
+				ATKType = ATKtype::None;
+				nextATKCount = maxATKWait;
+			}
+		}
+#pragma endregion
+		break;
+	default:
+		break;
+	}
 }
 
+void BCore::Beam() {
+	switch (MoveWave_) {
+	case MoveE::attackWait:
+#pragma region atkWait
+		if (!firstAction_) {
+			firstAction_ = true;
+			// 攻撃予備動作
+			T = 0;
 
+			WaitShotBeam = 0;
+
+			H_ = {
+			    head_.rotation_, {-0.7f, 0, 0}
+            };
+			B_ = {
+			    body_.rotation_, {0.7f, 0, 0}
+            };
+			Leg_ = {leg_.rotation_, leg_.rotation_};
+			LA1_ = {LArm1_.rotation_, LArm1_.rotation_};
+			LA2_ = {LArm2_.rotation_, LArm2_.rotation_};
+			LH_ = {Lhand_.rotation_, Lhand_.rotation_};
+
+			RA1_ = {RArm1_.rotation_, RArm1_.rotation_};
+			RA2_ = {RArm2_.rotation_, RArm2_.rotation_};
+			RH_ = {Rhand_.rotation_, Rhand_.rotation_};
+
+			CC = {
+			    C_center_.rotation_, {0.5f, 0, 0}
+            };
+		CL1_ = {
+		    C_L1_.rotation_, {-1.7f, 1, -1.3f}};
+		CL2_ = {
+		    C_L2_.rotation_, {0.4f, 0.5f, 0}};
+
+		CR1_ = {
+		    C_R1_.rotation_, {-1.7f, -1, 1.3f}};
+		CR2_ = {
+		    C_R2_.rotation_, {0.4f, -0.5f, 0}};
+		
+		} else {
+
+		SeeTarget();
+
+			// 設定したら更新
+			head_.rotation_ = ES(H_, T);
+			body_.rotation_ = ES(B_, T);
+			leg_.rotation_ = ES(Leg_, T);
+			LArm1_.rotation_ = ES(LA1_, T);
+			LArm2_.rotation_ = ES(LA2_, T);
+			Lhand_.rotation_ = ES(LH_, T);
+
+			RArm1_.rotation_ = ES(RA1_, T);
+			RArm2_.rotation_ = ES(RA2_, T);
+			Rhand_.rotation_ = ES(RH_, T);
+
+			C_center_.rotation_ = ES(CC, T);
+			C_L1_.rotation_ = ES(CL1_, T);
+			C_L2_.rotation_ = ES(CL2_, T);
+			C_R1_.rotation_ = ES(CR1_, T);
+			C_R2_.rotation_ = ES(CR2_, T);
+
+			// T追加
+			T += addAttackT / 4;
+			if (T > 1.0f) {
+				T = 1.0f;
+				if (++WaitShotBeam >= 300) {
+					// 次のアニメーションへ
+					T = 0;
+					firstAction_ = false;
+					MoveWave_ = MoveE::attack;
+				}
+			}
+		}
+#pragma endregion
+		
+		break;
+	case MoveE::attack:
+#pragma region atk
+		if (!firstAction_) {
+			// 打っている間
+			T += 1.0F / 300.0F;
+
+			// 時間超えたら
+			if (T > 1.0f) {
+				firstAction_ = true;
+				// 攻撃予備動作
+				T = 0;
+				weakC = WeakCore::center_;
+#pragma region 打ち終わった後のモーション処理
+				H_ = {
+				    head_.rotation_, {0.83f, 0, 0}};
+				B_ = {
+				    body_.rotation_, {0.5f, 0, 0}};
+				Leg_ = {leg_.rotation_, leg_.rotation_};
+				LA1_ = {LArm1_.rotation_, LArm1_.rotation_};
+				LA2_ = {LArm2_.rotation_, LArm2_.rotation_};
+				LH_ = {Lhand_.rotation_, Lhand_.rotation_};
+
+				RA1_ = {RArm1_.rotation_, RArm1_.rotation_};
+				RA2_ = {RArm2_.rotation_, RArm2_.rotation_};
+				RH_ = {Rhand_.rotation_, Rhand_.rotation_};
+
+				CC = {
+				    C_center_.rotation_, {-0.8f, 0, 0}};
+				CL1_ = {
+				    C_L1_.rotation_, {0, 0.7f, 1.5f}};
+				CL2_ = {
+				    C_L2_.rotation_, {0, 0, 0.1f}};
+
+				CR1_ = {
+				    C_R1_.rotation_, {0, -0.7f, -1.5f}};
+				CR2_ = {
+				    C_R2_.rotation_, {0, 0, -0.1f}};
+
+#pragma endregion
+			}
+		} else {
+			// 設定したら更新
+			head_.rotation_ = ES(H_, T);
+			body_.rotation_ = ES(B_, T);
+			leg_.rotation_ = ES(Leg_, T);
+			LArm1_.rotation_ = ES(LA1_, T);
+			LArm2_.rotation_ = ES(LA2_, T);
+			Lhand_.rotation_ = ES(LH_, T);
+
+			RArm1_.rotation_ = ES(RA1_, T);
+			RArm2_.rotation_ = ES(RA2_, T);
+			Rhand_.rotation_ = ES(RH_, T);
+
+			C_center_.rotation_ = ES(CC, T);
+			C_L1_.rotation_ = ES(CL1_, T);
+			C_L2_.rotation_ = ES(CL2_, T);
+			C_R1_.rotation_ = ES(CR1_, T);
+			C_R2_.rotation_ = ES(CR2_, T);
+
+			// T追加
+			T += addAttackT;
+			if (T > 1.0f) {
+				T = 0;
+				firstAction_ = false;
+				// 次のアニメーションへ
+				MoveWave_ = MoveE::back;
+			}
+		}
+#pragma endregion
+		break;
+	case MoveE::back:
+#pragma region back
+		if (!firstAction_) {
+			// 気絶時間まで待つ
+			T += 1.0f / 300.0f;
+
+			// 時間が終わったら
+			if (T > 1.0f) {
+				weakC = WeakCore::center_;
+				firstAction_ = true;
+				// 攻撃予備動作
+				T = 0;
+				H_ = {head_.rotation_, NorRotate_.H};
+				B_ = {body_.rotation_, NorRotate_.B};
+				Leg_ = {leg_.rotation_, NorRotate_.leg};
+				LA1_ = {LArm1_.rotation_, NorRotate_.LA1};
+				LA2_ = {LArm2_.rotation_, NorRotate_.LA2};
+				LH_ = {Lhand_.rotation_, NorRotate_.Lha};
+
+				RA1_ = {RArm1_.rotation_, NorRotate_.RA1};
+				RA2_ = {RArm2_.rotation_, NorRotate_.RA2};
+				RH_ = {Rhand_.rotation_, NorRotate_.Rha};
+
+				CC = {C_center_.rotation_, NorRotate_.CC};
+				CL1_ = {C_L1_.rotation_, NorRotate_.CL1};
+				CL2_ = {C_L2_.rotation_, NorRotate_.CL2};
+
+				CR1_ = {C_R1_.rotation_, NorRotate_.CR1};
+				CR2_ = {C_R2_.rotation_, NorRotate_.CR2};
+			}
+		} else {
+			// 設定したら更新
+			head_.rotation_ = ES(H_, T);
+			body_.rotation_ = ES(B_, T);
+			leg_.rotation_ = ES(Leg_, T);
+			LArm1_.rotation_ = ES(LA1_, T);
+			LArm2_.rotation_ = ES(LA2_, T);
+			Lhand_.rotation_ = ES(LH_, T);
+
+			RArm1_.rotation_ = ES(RA1_, T);
+			RArm2_.rotation_ = ES(RA2_, T);
+			Rhand_.rotation_ = ES(RH_, T);
+
+			C_center_.rotation_ = ES(CC, T);
+			C_L1_.rotation_ = ES(CL1_, T);
+			C_L2_.rotation_ = ES(CL2_, T);
+			C_R1_.rotation_ = ES(CR1_, T);
+			C_R2_.rotation_ = ES(CR2_, T);
+
+			// T追加
+			T += addAttackT;
+			if (T > 1.0f) {
+				Rhand_.scale_ = {1, 1, 1};
+				// Normalにする
+				T = 0;
+				firstAction_ = false;
+				MoveWave_ = MoveE::attackWait;
+				// シーン変換
+				ATKType = ATKtype::None;
+				nextATKCount = maxATKWait;
+			}
+		}
+#pragma endregion
+		break;
+	default:
+		break;
+	}
+
+}
+
+void BCore::ArmSwing() {
+	switch (MoveWave_) {
+	case MoveE::attackWait:
+#pragma region atkWait
+		if (!firstAction_) {
+			firstAction_ = true;
+			// 攻撃予備動作
+			T = 0;
+
+			H_ = {head_.rotation_, head_.rotation_};
+			B_ = {body_.rotation_, body_.rotation_};
+			Leg_ = {leg_.rotation_, leg_.rotation_};
+			LA1_ = {LArm1_.rotation_, LArm1_.rotation_};
+			LA2_ = {LArm2_.rotation_, LArm2_.rotation_};
+			LH_ = {Lhand_.rotation_, Lhand_.rotation_};
+
+			RA1_ = {RArm1_.rotation_, RArm1_.rotation_};
+			RA2_ = {RArm2_.rotation_, RArm2_.rotation_};
+			RH_ = {Rhand_.rotation_, Rhand_.rotation_};
+
+			CC = {C_center_.rotation_, C_center_.rotation_};
+
+			CL1_ = {
+			    C_L1_.rotation_, {0, 0, 0}
+            };
+			CL2_ = {
+			    C_L2_.rotation_, {0, 0, 0}
+            };
+
+			CR1_ = {
+			    C_R1_.rotation_, {0, 0, 0}
+            };
+			CR2_ = {
+			    C_R2_.rotation_, {0, 0, 0}
+            };
+		} else {
+			// 設定したら更新
+			head_.rotation_ = ES(H_, T);
+			body_.rotation_ = ES(B_, T);
+			leg_.rotation_ = ES(Leg_, T);
+			LArm1_.rotation_ = ES(LA1_, T);
+			LArm2_.rotation_ = ES(LA2_, T);
+			Lhand_.rotation_ = ES(LH_, T);
+
+			RArm1_.rotation_ = ES(RA1_, T);
+			RArm2_.rotation_ = ES(RA2_, T);
+			Rhand_.rotation_ = ES(RH_, T);
+
+			C_center_.rotation_ = ES(CC, T);
+			C_L1_.rotation_ = ES(CL1_, T);
+			C_L2_.rotation_ = ES(CL2_, T);
+			C_R1_.rotation_ = ES(CR1_, T);
+			C_R2_.rotation_ = ES(CR2_, T);
+
+			// T追加
+			T += addAttackT;
+			if (T > 1.0f) {
+				T = 1.0f;
+
+				// 次のアニメーションへ
+				T = 0;
+				firstAction_ = false;
+				MoveWave_ = MoveE::attack;
+			}
+		}
+#pragma endregion
+		SeeTarget();
+		break;
+	case MoveE::attack:
+#pragma region atk
+		if (!firstAction_) {
+
+			firstAction_ = true;
+			// 攻撃予備動作
+			T = 0;
+
+			//何回転するか
+			float R_Y = ((float)std::numbers::pi * 2) * 5.0f;
+
+			H_ = {head_.rotation_, head_.rotation_};
+			B_ = {body_.rotation_, {0,R_Y,0}};
+			Leg_ = {leg_.rotation_, leg_.rotation_};
+			LA1_ = {LArm1_.rotation_, LArm1_.rotation_};
+			LA2_ = {LArm2_.rotation_, LArm2_.rotation_};
+			LH_ = {Lhand_.rotation_, Lhand_.rotation_};
+
+			RA1_ = {RArm1_.rotation_, RArm1_.rotation_};
+			RA2_ = {RArm2_.rotation_, RArm2_.rotation_};
+			RH_ = {Rhand_.rotation_, Rhand_.rotation_};
+
+			CC = {C_center_.rotation_, C_center_.rotation_};
+
+			CL1_ = {
+			    C_L1_.rotation_, {0, 0, 0}
+            };
+			CL2_ = {
+			    C_L2_.rotation_, {0, 0, 0}
+            };
+
+			CR1_ = {
+			    C_R1_.rotation_, {0, 0, 0}
+            };
+			CR2_ = {
+			    C_R2_.rotation_, {0, 0, 0}
+            };
+		} else {
+			// 設定したら更新
+			head_.rotation_ = ES(H_, T);
+			body_.rotation_ = ES(B_, T);
+			leg_.rotation_ = ES(Leg_, T);
+			LArm1_.rotation_ = ES(LA1_, T);
+			LArm2_.rotation_ = ES(LA2_, T);
+			Lhand_.rotation_ = ES(LH_, T);
+
+			RArm1_.rotation_ = ES(RA1_, T);
+			RArm2_.rotation_ = ES(RA2_, T);
+			Rhand_.rotation_ = ES(RH_, T);
+
+			C_center_.rotation_ = ES(CC, T);
+			C_L1_.rotation_ = ES(CL1_, T);
+			C_L2_.rotation_ = ES(CL2_, T);
+			C_R1_.rotation_ = ES(CR1_, T);
+			C_R2_.rotation_ = ES(CR2_, T);
+
+			// T追加
+			T +=1.0f/300.0f;
+			if (T > 1.0f) {
+				T = 0;
+				firstAction_ = false;
+				// 次のアニメーションへ
+				MoveWave_ = MoveE::back;
+			}
+		}
+#pragma endregion
+		break;
+	case MoveE::back:
+#pragma region back
+		if (!firstAction_) {
+			firstAction_ = true;
+			// 攻撃予備動作
+			T = 0;
+			H_ = {head_.rotation_, NorRotate_.H};
+			B_ = {{0,0,0}, NorRotate_.B};
+			Leg_ = {leg_.rotation_, NorRotate_.leg};
+			LA1_ = {LArm1_.rotation_, NorRotate_.LA1};
+			LA2_ = {LArm2_.rotation_, NorRotate_.LA2};
+			LH_ = {Lhand_.rotation_, NorRotate_.Lha};
+
+			RA1_ = {RArm1_.rotation_, NorRotate_.RA1};
+			RA2_ = {RArm2_.rotation_, NorRotate_.RA2};
+			RH_ = {Rhand_.rotation_, NorRotate_.Rha};
+
+			CC = {C_center_.rotation_, NorRotate_.CC};
+			CL1_ = {C_L1_.rotation_, NorRotate_.CL1};
+			CL2_ = {C_L2_.rotation_, NorRotate_.CL2};
+
+			CR1_ = {C_R1_.rotation_, NorRotate_.CR1};
+			CR2_ = {C_R2_.rotation_, NorRotate_.CR2};
+		} else {
+			// 設定したら更新
+			head_.rotation_ = ES(H_, T);
+			body_.rotation_ = ES(B_, T);
+			leg_.rotation_ = ES(Leg_, T);
+			LArm1_.rotation_ = ES(LA1_, T);
+			LArm2_.rotation_ = ES(LA2_, T);
+			Lhand_.rotation_ = ES(LH_, T);
+
+			RArm1_.rotation_ = ES(RA1_, T);
+			RArm2_.rotation_ = ES(RA2_, T);
+			Rhand_.rotation_ = ES(RH_, T);
+
+			C_center_.rotation_ = ES(CC, T);
+			C_L1_.rotation_ = ES(CL1_, T);
+			C_L2_.rotation_ = ES(CL2_, T);
+			C_R1_.rotation_ = ES(CR1_, T);
+			C_R2_.rotation_ = ES(CR2_, T);
+
+			// T追加
+			T += addAttackT;
+			if (T > 1.0f) {
+
+				// Normalにする
+				T = 0;
+				firstAction_ = false;
+				MoveWave_ = MoveE::attackWait;
+				// シーン変換
+				ATKType = ATKtype::None;
+				nextATKCount = maxATKWait;
+			}
+		}
+#pragma endregion
+		break;
+	default:
+		break;
+	}
+}
+
+void BCore::ChaseBullet() {
+	switch (MoveWave_) {
+	case MoveE::attackWait:
+#pragma region atkWait
+		if (!firstAction_) {
+			firstAction_ = true;
+			// 攻撃予備動作
+			T = 0;
+
+			H_ = {head_.rotation_, head_.rotation_};
+			B_ = {body_.rotation_, body_.rotation_};
+			Leg_ = {leg_.rotation_, leg_.rotation_};
+			LA1_ = {LArm1_.rotation_, LArm1_.rotation_};
+			LA2_ = {LArm2_.rotation_, LArm2_.rotation_};
+			LH_ = {Lhand_.rotation_, Lhand_.rotation_};
+
+			RA1_ = {RArm1_.rotation_, RArm1_.rotation_};
+			RA2_ = {RArm2_.rotation_, RArm2_.rotation_};
+			RH_ = {Rhand_.rotation_, Rhand_.rotation_};
+
+			CC = {C_center_.rotation_, C_center_.rotation_};
+
+			CL1_ = {
+			    C_L1_.rotation_, {0, -0.5f, 0.7f}
+            };
+			CL2_ = {
+			    C_L2_.rotation_, {-3, 0.4f, -2.4f}
+            };
+
+			CR1_ = {
+			    C_R1_.rotation_, {0, 0.7f, 0}
+            };
+			CR2_ = {
+			    C_R2_.rotation_, {0, -2.4f, 0}
+            };
+		} else {
+			// 設定したら更新
+			head_.rotation_ = ES(H_, T);
+			body_.rotation_ = ES(B_, T);
+			leg_.rotation_ = ES(Leg_, T);
+			LArm1_.rotation_ = ES(LA1_, T);
+			LArm2_.rotation_ = ES(LA2_, T);
+			Lhand_.rotation_ = ES(LH_, T);
+
+			RArm1_.rotation_ = ES(RA1_, T);
+			RArm2_.rotation_ = ES(RA2_, T);
+			Rhand_.rotation_ = ES(RH_, T);
+
+			C_center_.rotation_ = ES(CC, T);
+			C_L1_.rotation_ = ES(CL1_, T);
+			C_L2_.rotation_ = ES(CL2_, T);
+			C_R1_.rotation_ = ES(CR1_, T);
+			C_R2_.rotation_ = ES(CR2_, T);
+
+			// T追加
+			T += addAttackT;
+			if (T > 1.0f) {
+				T = 1.0f;
+
+				// 次のアニメーションへ
+				T = 0;
+				firstAction_ = false;
+				MoveWave_ = MoveE::attack;
+			}
+		}
+#pragma endregion
+		SeeTarget();
+		break;
+	case MoveE::attack:
+#pragma region atk
+		if (!firstAction_) {
+			firstAction_ = true;
+			// 攻撃予備動作
+			T = 0;
+
+			H_ = {head_.rotation_, head_.rotation_};
+			B_ = {body_.rotation_, body_.rotation_};
+			Leg_ = {leg_.rotation_, leg_.rotation_};
+			LA1_ = {LArm1_.rotation_, LArm1_.rotation_};
+			LA2_ = {LArm2_.rotation_, LArm2_.rotation_};
+			LH_ = {Lhand_.rotation_, Lhand_.rotation_};
+
+			RA1_ = {RArm1_.rotation_, RArm1_.rotation_};
+			RA2_ = {RArm2_.rotation_, RArm2_.rotation_};
+			RH_ = {Rhand_.rotation_, Rhand_.rotation_};
+
+			CC = {C_center_.rotation_, C_center_.rotation_};
+
+			CL1_ = {
+			    C_L1_.rotation_, C_L1_.rotation_
+            };
+			CL2_ = {
+			    C_L2_.rotation_, C_L2_.rotation_
+            };
+
+			CR1_ = {
+			    C_R1_.rotation_, C_R1_.rotation_
+            };
+			CR2_ = {
+			    C_R2_.rotation_, C_R2_.rotation_
+            };
+
+			Lhand_.scale_ = {0, 0, 0};
+		} else {
+			// 設定したら更新
+			head_.rotation_ = ES(H_, T);
+			body_.rotation_ = ES(B_, T);
+			leg_.rotation_ = ES(Leg_, T);
+			LArm1_.rotation_ = ES(LA1_, T);
+			LArm2_.rotation_ = ES(LA2_, T);
+			Lhand_.rotation_ = ES(LH_, T);
+
+			RArm1_.rotation_ = ES(RA1_, T);
+			RArm2_.rotation_ = ES(RA2_, T);
+			Rhand_.rotation_ = ES(RH_, T);
+
+			C_center_.rotation_ = ES(CC, T);
+			C_L1_.rotation_ = ES(CL1_, T);
+			C_L2_.rotation_ = ES(CL2_, T);
+			C_R1_.rotation_ = ES(CR1_, T);
+			C_R2_.rotation_ = ES(CR2_, T);
+
+			// T追加
+			T += addAttackT;
+			if (T > 1.0f) {
+				T = 0;
+				firstAction_ = false;
+				// 次のアニメーションへ
+				MoveWave_ = MoveE::back;
+			}
+		}
+#pragma endregion
+		break;
+	case MoveE::back:
+#pragma region back
+		if (!firstAction_) {
+			firstAction_ = true;
+			// 攻撃予備動作
+			T = 0;
+			H_ = {head_.rotation_, NorRotate_.H};
+			B_ = {body_.rotation_, NorRotate_.B};
+			Leg_ = {leg_.rotation_, NorRotate_.leg};
+			LA1_ = {LArm1_.rotation_, NorRotate_.LA1};
+			LA2_ = {LArm2_.rotation_, NorRotate_.LA2};
+			LH_ = {Lhand_.rotation_, NorRotate_.Lha};
+
+			RA1_ = {RArm1_.rotation_, NorRotate_.RA1};
+			RA2_ = {RArm2_.rotation_, NorRotate_.RA2};
+			RH_ = {Rhand_.rotation_, NorRotate_.Rha};
+
+			CC = {C_center_.rotation_, NorRotate_.CC};
+			CL1_ = {C_L1_.rotation_, NorRotate_.CL1};
+			CL2_ = {C_L2_.rotation_, NorRotate_.CL2};
+
+			CR1_ = {C_R1_.rotation_, NorRotate_.CR1};
+			CR2_ = {C_R2_.rotation_, NorRotate_.CR2};
+
+
+			Stock1_ = {
+			    Lhand_.scale_, {1, 1, 1}
+            };
+		} else {
+			// 設定したら更新
+			head_.rotation_ = ES(H_, T);
+			body_.rotation_ = ES(B_, T);
+			leg_.rotation_ = ES(Leg_, T);
+			LArm1_.rotation_ = ES(LA1_, T);
+			LArm2_.rotation_ = ES(LA2_, T);
+			Lhand_.rotation_ = ES(LH_, T);
+
+			RArm1_.rotation_ = ES(RA1_, T);
+			RArm2_.rotation_ = ES(RA2_, T);
+			Rhand_.rotation_ = ES(RH_, T);
+
+			C_center_.rotation_ = ES(CC, T);
+			C_L1_.rotation_ = ES(CL1_, T);
+			C_L2_.rotation_ = ES(CL2_, T);
+			C_R1_.rotation_ = ES(CR1_, T);
+			C_R2_.rotation_ = ES(CR2_, T);
+
+			Lhand_.scale_ = ES(Stock1_, T);
+
+			// T追加
+			T += addAttackT;
+			if (T > 1.0f) {
+
+				Lhand_.scale_ = {1, 1, 1};
+				// Normalにする
+				T = 0;
+				firstAction_ = false;
+				MoveWave_ = MoveE::attackWait;
+				// シーン変換
+				ATKType = ATKtype::None;
+				nextATKCount = maxATKWait;
+			}
+		}
+#pragma endregion
+		break;
+	default:
+		break;
+	}
+}
+    //死ぬときのアニメーション
 void BCore::BreakAnime() {
 
 }
-
 
 void BCore::Move() {
 	switch (state_) {
@@ -418,13 +1501,12 @@ void BCore::Update() {
 	ImGui::DragFloat3("p CR1", &C_R1_.rotation_.x, 0.01f);
 	ImGui::DragFloat3("p CR2", &C_R2_.rotation_.x, 0.01f);
 
+
+	ImGui::DragFloat3("LH scale", &Lhand_.scale_.x, 0.01f);
+	ImGui::DragFloat3("RH scale", &Rhand_.scale_.x, 0.01f);
+
 	ImGui::End();
 #endif // _DEBUG
-
-
-
-	
-
 	UpdateAllMatrix();
 }
 

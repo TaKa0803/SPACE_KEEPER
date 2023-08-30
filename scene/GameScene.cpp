@@ -94,7 +94,7 @@ void GameScene::LoadClass() {
 	// 巨大ボスのコア
 	core_ = std::make_unique<BCore>();
 	core_->Initialize(CoreModels);
-	
+	core_->SetgameScene(this);
 
 
 	//プレイヤー
@@ -104,6 +104,7 @@ void GameScene::LoadClass() {
 	//プレイヤーの移動の中心を設定
 	//player_->SetParent(&core_->GetWorldTransform());
 	player_->SetParent(&title_->GetRW());
+	player_->SetView(&view_);
 
 	core_->SetPlayer(&player_->GetWorldTransform());
 
@@ -201,9 +202,13 @@ void GameScene::EndAnime() {
 }
 
 void GameScene::TitlrUpdate() { 
+	#ifdef _DEBUG
 	ImGui::Begin("game");
 	ImGui::DragFloat("t", &et, 0.01f);
 	ImGui::End();
+#endif // _DEBUG
+
+	
 
 	title_->Update();
 	if (title_->GetScene() != Scene::endAnimation) {
@@ -233,7 +238,7 @@ void GameScene::TitlrUpdate() {
 		bullet->Update();
 	}
 #pragma endregion
-
+	
 #pragma region 
 	// 当たり判定
 	if (!title_->IsPlay()) {
@@ -375,12 +380,7 @@ void GameScene::CheckAllCollision() {
 		}
 	}
 #pragma endregion
-
-	if (input_->TriggerKey(DIK_0)) {
-		for (int i = 0; i < 500; i++) {
-			core_->InCollision();
-		}
-	}
+	
 
 }
 
@@ -505,10 +505,12 @@ void GameScene::DrawSprite() {
 
 	switch (scene_) {
 	case GScene::Title:
+		player_->DrawUI();
 		break;
 	case GScene::TitleToIngame:
 		break;
 	case GScene::InGame:
+		player_->DrawUI();
 		break;
 	case GScene::InGameToClear:
 		break;

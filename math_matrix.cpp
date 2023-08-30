@@ -3,6 +3,19 @@
 #include <cassert>
 #include <cmath>
 #include<iostream>
+#include <time.h>
+
+int GetRandomNum(int wideOrmax,bool isWide) { 
+	unsigned int curtime = (unsigned int)time(nullptr);
+	srand(curtime);
+	int num;
+	if (isWide) {
+		num = rand() % (wideOrmax * 2 + 1) - wideOrmax;
+	} else {
+		num = rand() % wideOrmax;
+	}
+	return num;
+}
 
 Vector2 CheckRotateFromVelo(const Vector3& v) {
 	float length = LengV2({v.x,v.z});
@@ -16,11 +29,16 @@ Vector2 CheckRotateFromVelo(const Vector3& v) {
 float CheckR_F_Y(const Vector2& v) { return std::atan2(v.x, v.y); }
 
 Vector3 Esing(Vector3 st, Vector3 ed, float t) { 
+
+	t = 1.0f - (float)pow(1 - t, 5);
+
 	return {
 		st.x * (1.0f - t) + ed.x * t, 
 	    st.y * (1.0f - t) + ed.y * t,
 	    st.z * (1.0f - t) + ed.z * t,
 	}; 
+
+	
 }
 
 // エリア内にもどす（円形）引数のposの数字を変えて

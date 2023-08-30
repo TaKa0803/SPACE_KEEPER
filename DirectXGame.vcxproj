@@ -115,7 +115,6 @@
     <ClCompile Include="core.cpp" />
     <ClCompile Include="Effect.cpp" />
     <ClCompile Include="Enemy.cpp" />
-    <ClCompile Include="Glovalv.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math_matrix.cpp" />
     <ClCompile Include="Plane.cpp" />
@@ -157,7 +156,6 @@
     <ClInclude Include="core.h" />
     <ClInclude Include="Effect.h" />
     <ClInclude Include="Enemy.h" />
-    <ClInclude Include="Glovalv.h" />
     <ClInclude Include="input\Input.h" />
     <ClInclude Include="math\Matrix4x4.h" />
     <ClInclude Include="math\Vector2.h" />

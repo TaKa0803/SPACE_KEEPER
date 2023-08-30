@@ -1,13 +1,14 @@
 #include"Reticle.h"
 #include<ImGuiManager.h>
 #include"math_matrix.h"
-
-
+#include<GameScene.h>
 
 void Reticle::Initialize(Model* model, const WorldTransform& parent) {
 	input_ = Input::GetInstance();
 	
 	tex_ = TextureManager::Load("reticle.png");
+
+	R2D_ = Sprite::Create(tex_, {0, 0}, {1.0f, 1.0f, 1.0f, 1.0f}, {0.5f,0.5f});
 
 	reticleWorld_.Initialize();
 	reticleWorld_.translation_ = NormalPos;
@@ -17,7 +18,7 @@ void Reticle::Initialize(Model* model, const WorldTransform& parent) {
 	model_ = model;
 }
 
-
+void Reticle::DrawSPrite() { R2D_->Draw(); }
 
 void Reticle::Move(float length) {
 	float maxfar = 220;
@@ -76,11 +77,18 @@ void Reticle::Update(float depth) {
 	//行列更新
 	reticleWorld_.UpdateMatrix();
 
+	Vector3 posRE = GetmatW();
+
+	//2Dレティクル移動
+	Matrix4x4 matvp = MakeViewportM(0, 0, WinApp::kWindowWidth, WinApp::kWindowHeight, 0, 1);
+	Matrix4x4 matvpv = Multiply(Multiply(view_->matView, view_->matProjection), matvp);
+	Vector3 pos = Transform(posRE, matvpv);
+	R2D_->SetPosition({pos.x,pos.y});
 }
 
 void Reticle::Draw(ViewProjection view) { 
 
-	model_->Draw(reticleWorld_, view);
+	//model_->Draw(reticleWorld_, view);
 
 	
 }

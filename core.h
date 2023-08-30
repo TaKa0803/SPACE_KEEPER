@@ -37,6 +37,16 @@ struct esing {
 
 };
 
+
+enum class ATKtype {
+	Eye_Layzer,
+	Punch_missiles,
+	Beam,
+	Armswinging,
+	ChaseBullet,
+	None,
+};
+
 struct N_R {
 	Vector3 H;
 	Vector3 B;
@@ -55,7 +65,7 @@ struct N_R {
 	Vector3 CR2;
 };
 
-
+class GameScene;
 
 class BCore :public BaseCharacter{
 public:
@@ -111,6 +121,7 @@ public:
 			break;
 		case WeakCore::None:
 			break;
+		
 		default:
 			break;
 		}
@@ -134,6 +145,8 @@ public:
 
 private:
 
+	
+
 	void Start();
 
 	void StartAnime();
@@ -144,7 +157,15 @@ private:
 
 	void Move();
 
+	void EyeLayzer();
 
+	void Punch_M();
+
+	void Beam();
+
+	void ArmSwing();
+
+	void ChaseBullet();
 #pragma region Animation
 
 	//攻撃予備動作
@@ -171,13 +192,26 @@ private:
 	esing CR1_;
 	esing CR2_;
 
-	bool firstAction_ = false;
-
-	MoveE MoveWave_ = MoveE::attackWait;
-
+	esing Stock1_;
+	esing Stock2_;
+	esing Stock3_;
 #pragma endregion
 
-	
+	uint32_t WaitShotBeam = 0;
+
+	//初期化
+	bool firstAction_ = false;
+
+	//攻撃のモード
+	MoveE MoveWave_ = MoveE::attackWait;
+
+	//攻撃状態
+	ATKtype ATKType = ATKtype::None;
+
+	uint32_t nextATKCount = 60;
+
+	const uint32_t maxATKWait = 180;
+
 	const N_R NorRotate_ = {
 	    .H{0, 0,     0    },
 	    .B{0, 0,     0    },
@@ -204,11 +238,15 @@ private:
 
 	const uint32_t maxHP = 1000;
 
+	//コアの基本状態
 	StateCore state_ = StateCore::Start;
 
-	// 弱点コア
+	// 弱点コア位置
 	WeakCore weakC = WeakCore::L1;
 
+	const uint32_t maxCoreSwitchTime = 60 * 20;
+
+	uint32_t coreSwitchTime_ = 0;
 
 
 	const WorldTransform* player_;
