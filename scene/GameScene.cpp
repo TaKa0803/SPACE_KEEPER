@@ -27,6 +27,11 @@ void GameScene::Initialize() {
 	LoadTexture();
 	LoadModel();
 	LoadClass();
+
+	clear_ = TextureManager::Load("Clear.png");
+	sprite_.reset(Sprite::Create(clear_, {0, 0}));
+	
+	red_ = TextureManager::Load("Weak.png");
 }
 
 //モデルのロードまとめ
@@ -56,6 +61,21 @@ void GameScene::LoadModel() {
 	//タイトル	
 	titleModel_.reset(Model::CreateFromOBJ("Title"));
 	titleTileM_.reset(Model::CreateFromOBJ("TitleTile"));
+
+	//敵
+	ebody_.reset(Model::CreateFromOBJ("Ebody"));
+	ehead_.reset(Model::CreateFromOBJ("Ehead"));
+	eleg.reset(Model::CreateFromOBJ("Eleg"));
+	eL1A_.reset(Model::CreateFromOBJ("ELArm1"));
+	eL2A_.reset(Model::CreateFromOBJ("ELArm2"));
+	eLhand_.reset(Model::CreateFromOBJ("ELhand"));
+
+	eR1A_.reset(Model::CreateFromOBJ("ERArm1"));
+	eR2A_.reset(Model::CreateFromOBJ("ERArm2"));
+	eRhand_.reset(Model::CreateFromOBJ("ERhand"));
+
+	theCore_.reset(Model::CreateFromOBJ("WeakP"));
+	weekCore_.reset(Model::CreateFromOBJ("WeekRED"));
 }
 
 //クラスのロードまとめ
@@ -66,10 +86,15 @@ void GameScene::LoadClass() {
 	title_ = std::make_unique<TitleS>();
 	title_->Initialize(titleModel_.get(), titleTileM_.get());
 
-	// 巨大ボスのコア
-	core_ = std::make_unique<Core>();
-	core_->Initialize(coreModel_.get());
 
+	std::vector<Model*> CoreModels = {ehead_.get(),  ebody_.get(),  eleg.get(),  eL1A_.get(),
+	                                  eL2A_.get(),   eLhand_.get(), eR1A_.get(), eR2A_.get(),
+	                                  eRhand_.get(), theCore_.get(), weekCore_.get()};
+
+	// 巨大ボスのコア
+	core_ = std::make_unique<BCore>();
+	core_->Initialize(CoreModels);
+	
 	//プレイヤー
 	player_ = std::make_unique<Player>();
 	player_->Initialize(playerModels,10);
@@ -77,7 +102,9 @@ void GameScene::LoadClass() {
 	//プレイヤーの移動の中心を設定
 	//player_->SetParent(&core_->GetWorldTransform());
 	player_->SetParent(&title_->GetRW());
-	
+
+	core_->SetPlayer(&player_->GetWorldTransform());
+
 	//カメラ
 	camera_ = std::make_unique<Camera>();
 	//コアをターゲットにして初期化
@@ -258,19 +285,28 @@ void GameScene::InGameUpdate() {
 	CheckAllCollision();
 
 	
-
+	//しんだらシーン変換
+	if (core_->IsDead()) {
+		scene_ = GScene::Clear;
+	}
 	
 }
 
-void GameScene::ClearUpdate() {
+void GameScene::ClearUpdate() { 
+	if (joyState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) {
+		scene_ = GScene::Title;
 
+
+		Initialize();
+	}
 
 }
 
 //更新処理
 void GameScene::Update() { 
 	skydome_->Update();
-	
+	Input::GetInstance()->GetJoystickState(0, joyState);
+
 	switch (scene_) {
 	case GScene::Title:
 		TitlrUpdate();
@@ -332,7 +368,11 @@ void GameScene::CheckAllCollision() {
 	}
 #pragma endregion
 
-
+	if (input_->TriggerKey(DIK_0)) {
+		for (int i = 0; i < 500; i++) {
+			//core_->InCollision();
+		}
+	}
 
 }
 
@@ -455,6 +495,22 @@ void GameScene::DrawModel() {
 //スプライト描画
 void GameScene::DrawSprite() {
 
-
+	switch (scene_) {
+	case GScene::Title:
+		break;
+	case GScene::TitleToIngame:
+		break;
+	case GScene::InGame:
+		break;
+	case GScene::InGameToClear:
+		break;
+	case GScene::Clear:
+		sprite_->Draw();
+		break;
+	case GScene::BackTitle:
+		break;
+	default:
+		break;
+	}
 
 }

@@ -110,6 +110,8 @@ void Player::Attack() {
 		newBullet->Initialize(ammo, GetplayermatTranslate(), velocity,rotate);
 
 		gameScene_->AddPlayerBullet(newBullet);
+
+
 	}
 }
 
@@ -235,10 +237,10 @@ void Player::Move() {
 
 	}
 
-	if (playerMoveW.translation_.z > -50) {
-		playerMoveW.translation_.z = -50;
-	} else if (playerMoveW.translation_.z < -200) {
-		playerMoveW.translation_.z = -200;
+	if (playerMoveW.translation_.z > -110) {
+		playerMoveW.translation_.z = -110;
+	} else if (playerMoveW.translation_.z < -250) {
+		playerMoveW.translation_.z = -250;
 	}
 
 	

@@ -15,6 +15,7 @@ void TitleS::Initialize(Model* model,Model*tile) {
 	tile_.scale_ = {3.0f, 3.0f, 1};
 }
 
+
 void TitleS::Update() { 
 	#ifdef _DEBUG
 	ImGui::Begin("Title");
@@ -25,6 +26,7 @@ void TitleS::Update() {
 	ImGui::DragFloat3("tpos", &tile_.translation_.x, 0.01f);
 	ImGui::DragFloat3("trotate", &tile_.rotation_.x, 0.01f);
 	ImGui::DragFloat3("tscale", &tile_.scale_.x, 0.01f);
+	ImGui::Text("count/max : %d/%d", hitCount_, maxHitNum);
 	ImGui::End();
 #endif // _DEBUG
 	switch (scene_) {
@@ -124,8 +126,6 @@ void TitleS::EndAnimation() {
 		isPlay_ = true;
 	}
 }
-
-
 
 void TitleS::OnCollision() {
 	if (scene_ == Scene::normal) {

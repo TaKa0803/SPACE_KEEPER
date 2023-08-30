@@ -104,7 +104,7 @@ private:
 	//
 	Vector3 stP = {0,0,-340};
 
-	Vector3 edP = {0,0,-100};
+	Vector3 edP = {0,0,-110};
 
 	//レティクル
 	Reticle* reticle_;

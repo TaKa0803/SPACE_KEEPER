@@ -51,7 +51,7 @@ public:
 
 	bool isPlay_ = false;
 
-	Vector3 zero = {0, 0, 0};
+	const Vector3 zero = {0, 0, 0};
 
 	Vector3 velo_ = {0, 0, 0};
 	//Vector3 acce_ = {0, 0, 0};

@@ -97,6 +97,9 @@ private:
 
 	GScene scene_ = GScene::Title;
 
+	XINPUT_STATE joyState;
+	
+
 	/// <summary>
 	/// ゲームシーン用
 	/// </summary>
@@ -128,7 +131,7 @@ private:
 
 
 
-	std::unique_ptr<Core> core_ = nullptr;
+	std::unique_ptr<BCore> core_ = nullptr;
 
 	//敵
 	std::list<Enemy*> enemy_;
@@ -172,11 +175,39 @@ private:
 	std::unique_ptr<Model> titleModel_;
 
 	std::unique_ptr<Model> titleTileM_;
+
+
+#pragma region bos
+	std::unique_ptr<Model> theCore_;
+	std::unique_ptr<Model> weekCore_;
+
+	std::unique_ptr<Model> ebody_;
+	std::unique_ptr<Model> ehead_;
+	
+	std::unique_ptr<Model> eleg;
+	std::unique_ptr<Model> eL1A_;
+	std::unique_ptr<Model> eL2A_;
+	std::unique_ptr<Model> eLhand_;
+
+	std::unique_ptr<Model> eR1A_;
+	std::unique_ptr<Model> eR2A_;
+	std::unique_ptr<Model> eRhand_;
+
+#pragma endregion
+
+
+
+
 #pragma endregion
 
 
 #pragma region texture
 	uint32_t basicTex_;
+
+	uint32_t clear_;
+	std::unique_ptr<Sprite> sprite_ = nullptr;
+
+	uint32_t red_;
 #pragma endregion
 
 	

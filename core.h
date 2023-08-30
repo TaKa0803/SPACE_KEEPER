@@ -1,32 +1,71 @@
 #pragma once
 #include<Model.h>
 #include<WorldTransform.h>
-class Core {
+#include"BaseCharacter.h"
+
+enum class WeakCore { 
+	center_,
+	L1,
+	L2,
+	R1,
+	R2
+};
+
+
+class BCore :public BaseCharacter{
 public:
-	void Initialize(Model* model);
+	
 
-	void Update();
+	void Initialize(const std::vector<Model*>& models);
 
-	void Draw(ViewProjection view);
+	
+	void Update()override;
+
+	void Draw(const ViewProjection& view)override;
 
 	void InCollision();
 
-	bool IsDead() { return isdead_; }
-
 	Vector3 GetmatW() {
-		return {world_.matWorld_.m[3][0], world_.matWorld_.m[3][1], world_.matWorld_.m[3][2]};
+		return {
+		    worldtransform_.matWorld_.m[3][0], worldtransform_.matWorld_.m[3][1],
+		    worldtransform_.matWorld_.m[3][2]};
 	}
 
-	const WorldTransform& GetWorldTransform() { return world_; }
+	
+	void UpdateAllMatrix();
 
+	void SetPlayer(const WorldTransform* world) { player_ = world; }
+
+	void SeeTarget();
 
 private:
-	Model* model_ = nullptr;
+	const WorldTransform* player_;
+
+	Vector3 GetTargetW() { 
+		return {player_->matWorld_.m[3][0], player_->matWorld_.m[3][1], player_->matWorld_.m[3][2]
+		};
+	}
 
 	
-	WorldTransform world_;
+	WeakCore weakC = WeakCore::center_;
 
-	int32_t hp_;
+	
+	WorldTransform head_;
+	WorldTransform body_;
+	WorldTransform leg_;
+	WorldTransform LArm1_;
+	WorldTransform LArm2_;
+	WorldTransform RArm1_;
+	WorldTransform RArm2_;
 
-	bool isdead_;
+	WorldTransform Lhand_;
+	WorldTransform Rhand_;
+
+	//コア
+	WorldTransform C_center_;
+	WorldTransform C_L1_;
+	WorldTransform C_L2_;
+	WorldTransform C_R1_;
+	WorldTransform C_R2_;
+
 };

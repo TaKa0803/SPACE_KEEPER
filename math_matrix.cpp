@@ -13,6 +13,8 @@ Vector2 CheckRotateFromVelo(const Vector3& v) {
 	};
 }
 
+float CheckR_F_Y(const Vector2& v) { return std::atan2(v.x, v.y); }
+
 Vector3 Esing(Vector3 st, Vector3 ed, float t) { 
 	return {
 		st.x * (1.0f - t) + ed.x * t, 

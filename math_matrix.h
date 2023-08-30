@@ -3,6 +3,8 @@
 #include <Vector3.h>
 #include<Vector2.h>
 
+float CheckR_F_Y(const Vector2& v);
+
 Vector3 Esing(Vector3 st, Vector3 ed, float t);
 
 Vector2 CheckRotateFromVelo(const Vector3& v);
