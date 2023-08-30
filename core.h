@@ -3,13 +3,58 @@
 #include<WorldTransform.h>
 #include"BaseCharacter.h"
 
+//敵の行動状態
+enum class StateCore {
+	Start,
+	StartAnimation,
+
+	Normal,
+
+	breakAnimetion,
+
+};
+
+//弱点コアの場所
 enum class WeakCore { 
 	center_,
 	L1,
 	L2,
 	R1,
-	R2
+	R2,
+	None,
 };
+
+
+enum class MoveE {
+	attackWait,
+	attack,
+	back,
+};
+
+struct esing {
+	Vector3 st;
+	Vector3 ed;
+
+};
+
+struct N_R {
+	Vector3 H;
+	Vector3 B;
+	Vector3 leg;
+	Vector3 LA1;
+	Vector3 LA2;
+	Vector3 Lha;
+	Vector3 RA1;
+	Vector3 RA2;
+	Vector3 Rha;
+
+	Vector3 CC;
+	Vector3 CL1;
+	Vector3 CL2;
+	Vector3 CR1;
+	Vector3 CR2;
+};
+
 
 
 class BCore :public BaseCharacter{
@@ -31,14 +76,141 @@ public:
 		    worldtransform_.matWorld_.m[3][2]};
 	}
 
+	Vector3 GetmatCore() {
+		Vector3 pos={0,-1000,0};
+		switch (weakC) {
+		case WeakCore::center_:
+			pos = {
+			    C_center_.matWorld_.m[3][0], 
+				C_center_.matWorld_.m[3][1],
+			    C_center_.matWorld_.m[3][2]};
+			break;
+		case WeakCore::L1:
+			pos = {
+			    C_L1_.matWorld_.m[3][0], 
+				C_L1_.matWorld_.m[3][1],
+			    C_L1_.matWorld_.m[3][2]};
+			break;
+		case WeakCore::L2:
+			pos = {
+			    C_L2_.matWorld_.m[3][0],
+				C_L2_.matWorld_.m[3][1],
+			    C_L2_.matWorld_.m[3][2]};
+			break;
+		case WeakCore::R1:
+			pos = {
+			    C_R1_.matWorld_.m[3][0], 
+				C_R1_.matWorld_.m[3][1],
+			    C_R1_.matWorld_.m[3][2]};
+			break;
+		case WeakCore::R2:
+			pos = {
+			    C_R2_.matWorld_.m[3][0], 
+				C_R2_.matWorld_.m[3][1],
+			    C_R2_.matWorld_.m[3][2]};
+			break;
+		case WeakCore::None:
+			break;
+		default:
+			break;
+		}
+	
+	
+		return pos;
+	}
 	
 	void UpdateAllMatrix();
 
-	void SetPlayer(const WorldTransform* world) { player_ = world; }
+	void SetPlayer(const WorldTransform* world) { 
+		player_ = world;
+		
+	}
 
 	void SeeTarget();
 
+	const StateCore GetState() { return state_; }
+
+	void SetStart();
+
 private:
+
+	void Start();
+
+	void StartAnime();
+
+	void Normal();
+
+	void BreakAnime();
+
+	void Move();
+
+
+#pragma region Animation
+
+	//攻撃予備動作
+	float T = 0;
+	
+	//頭イージング
+	esing H_;
+	//身体イージング
+	esing B_;
+	//
+	esing Leg_;
+
+	esing LA1_;
+	esing LA2_;
+	esing RA1_;
+	esing RA2_;
+
+	esing LH_;
+	esing RH_;
+
+	esing CC;
+	esing CL1_;
+	esing CL2_;
+	esing CR1_;
+	esing CR2_;
+
+	bool firstAction_ = false;
+
+	MoveE MoveWave_ = MoveE::attackWait;
+
+#pragma endregion
+
+	
+	const N_R NorRotate_ = {
+	    .H{0, 0,     0    },
+	    .B{0, 0,     0    },
+	    .leg{0, 0,     0    },
+
+	    .LA1{0, 0,     0    },
+	    .LA2{0, 0,     0    },
+	    .Lha{0, 0,     0    },
+	    .RA1{0, 0,     0    },
+	    .RA2{0, 0,     0    },
+	    .Rha{0, 0,     0    },
+
+	    .CC{0, 0,     0    },
+	    .CL1{0, 0,     0.5f },
+	    .CL2{0, 2.5f,  0.5  },
+	    .CR1{0, 0.5f,  -0.6f},
+	    .CR2{0, -2.4f, 0    },
+	};
+
+	const float addWaitT = 1.0f / 60.0f;
+
+	const float addAttackT = 1.0f / 30.0f;
+
+
+	const uint32_t maxHP = 1000;
+
+	StateCore state_ = StateCore::Start;
+
+	// 弱点コア
+	WeakCore weakC = WeakCore::L1;
+
+
+
 	const WorldTransform* player_;
 
 	Vector3 GetTargetW() { 
@@ -47,8 +219,6 @@ private:
 	}
 
 	
-	WeakCore weakC = WeakCore::center_;
-
 	
 	WorldTransform head_;
 	WorldTransform body_;

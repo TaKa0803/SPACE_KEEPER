@@ -46,6 +46,7 @@ private:
 	//レティクル原点
 	const Vector3 NormalPos = {0, 0, 30};
 
+	int tex_;
 };
 
 

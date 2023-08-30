@@ -7,6 +7,8 @@
 void Reticle::Initialize(Model* model, const WorldTransform& parent) {
 	input_ = Input::GetInstance();
 	
+	tex_ = TextureManager::Load("reticle.png");
+
 	reticleWorld_.Initialize();
 	reticleWorld_.translation_ = NormalPos;
 	//reticleWorld_.scale_ = {1, 1, 10};

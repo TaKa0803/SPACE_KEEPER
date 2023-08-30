@@ -39,6 +39,9 @@ public:
 
 	void Setfar(float Far) { playerMoveW.translation_.z = Far; }
 
+
+	void SetStart();
+
 private:
 #pragma region まとめ
 	void GetStatus();
@@ -74,7 +77,7 @@ private:
 	Model* ammo = nullptr;
 	
 	// 弾の速度
-	const float kBulletSpeed = 1.0f;
+	const float kBulletSpeed = 5.0f;
 
 	bool canBulletShot_ = true;
 
@@ -102,9 +105,9 @@ private:
 	const float area = 2.0f;
 
 	//
-	Vector3 stP = {0,0,-340};
+	const Vector3 stP = {0,0,-340};
 
-	Vector3 edP = {0,0,-110};
+	const Vector3 edP = {0,0,-110};
 
 	//レティクル
 	Reticle* reticle_;

@@ -95,6 +95,8 @@ void GameScene::LoadClass() {
 	core_ = std::make_unique<BCore>();
 	core_->Initialize(CoreModels);
 	
+
+
 	//プレイヤー
 	player_ = std::make_unique<Player>();
 	player_->Initialize(playerModels,10);
@@ -129,6 +131,13 @@ void GameScene::LoadClass() {
 //画像ロード
 void GameScene::LoadTexture() { basicTex_ = TextureManager::Load("uvChecker.png"); }
 
+void GameScene::SetStartUP() { 
+	player_->SetStart();
+	player_->SetParent(&title_->GetRW());
+	camera_->Setfar(-10.0f);
+	core_->SetStart();
+	title_->SetStartSta();
+}
 
 //プレイヤーの弾追加
 void GameScene::AddPlayerBullet(PlayerBullet* playerBullet) {
@@ -233,7 +242,7 @@ void GameScene::TitlrUpdate() {
 				Vector3 Bpos = bullet->GetWorldT();
 
 				if (-20 <= Bpos.x && Bpos.x <= 20 && -10 <= Bpos.y && Bpos.y <= 10 &&
-				    -301 <= Bpos.z && Bpos.z <= -299) {
+				    -305 <= Bpos.z && Bpos.z <= -295) {
 					bullet->OnCollision();
 					title_->OnCollision();
 				}
@@ -295,9 +304,8 @@ void GameScene::InGameUpdate() {
 void GameScene::ClearUpdate() { 
 	if (joyState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) {
 		scene_ = GScene::Title;
-
-
-		Initialize();
+		
+		SetStartUP();
 	}
 
 }
@@ -356,7 +364,7 @@ void GameScene::CheckAllCollision() {
 #pragma region 自分の弾とコアとの当たり判定
 	for (PlayerBullet* bullet : playerbullets_) {
 		Vector3 Bpos = bullet->GetWorldT();
-		if (CheckHitSphere(core_->GetmatW(), Bpos, 1, 1)) {
+		if (CheckHitSphere(core_->GetmatCore(), Bpos, 1, 5)) {
 			// 敵の当たり判定
 			core_->InCollision();
 			
@@ -370,7 +378,7 @@ void GameScene::CheckAllCollision() {
 
 	if (input_->TriggerKey(DIK_0)) {
 		for (int i = 0; i < 500; i++) {
-			//core_->InCollision();
+			core_->InCollision();
 		}
 	}
 

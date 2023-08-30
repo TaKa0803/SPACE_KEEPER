@@ -32,6 +32,8 @@ public:
 
 	bool IsPlay() { return isPlay_; }
 
+
+	void SetStartSta();
 	private:
 #pragma region まとめ
 	    void SetStart();

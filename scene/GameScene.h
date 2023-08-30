@@ -68,8 +68,9 @@ public: // メンバ関数
 
 	void AddPlayerBullet(PlayerBullet* playerBullet);
 
+	void SetStartUP();
 
-private: 	
+private:
 #pragma region 各種クラス内呼び出し関数
 	void LoadModel();
 	void LoadClass();

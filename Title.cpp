@@ -15,6 +15,26 @@ void TitleS::Initialize(Model* model,Model*tile) {
 	tile_.scale_ = {3.0f, 3.0f, 1};
 }
 
+void TitleS::SetStartSta() {
+	world_.translation_ = {0, 20, -300};
+	world_.rotation_={0, 0, 0};
+	world_.scale_ = {4, 4, 1};
+
+	tile_.translation_ = {0, 0, -0.6f};
+	tile_.scale_ = {3.0f, 3.0f, 1};
+
+	velo_ = {0, 0, 0};
+
+	isPlay_ = false;
+
+	scene_ = Scene::start;
+
+	anime_ = NormalAnime::Normal;
+
+	hitCount_ = 0;
+
+	floatT = 0;
+}
 
 void TitleS::Update() { 
 	#ifdef _DEBUG

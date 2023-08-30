@@ -5,6 +5,37 @@
 #include<GameScene.h>
 #include<iostream>
 
+void Player::SetStart() {
+	hp_ = 10;
+	worldtransform_.translation_ = {0, -3.5f, 0};
+	worldtransform_.rotation_ = {0, 0, 0};
+	worldtransform_.scale_ = {1, 1, 1};
+	// ターゲットとの距離（Z)
+	playerMoveW.translation_ = {0, 0, -40.0f};
+	playerMoveW.rotation_ = {0, 0, 0};
+
+	bodyW_.translation_ = {0, 0.5f, 0};
+	bodyW_.rotation_ = {0, 0, 0};
+	headW_.translation_ = {0, 0.3f, 0};
+	LlegW_.translation_ = {-0.18f, -0.6f, 0};
+	RlegW_.translation_ = {0.18f, -0.6f, 0};
+	jettpack_.translation_ = {0, -0.1f, -0.64f};
+
+	fire_.translation_ = {0, -0.3f, 0};
+	fire_.scale_ = {0.8f, 1, 0.8f};
+
+	canBulletShot_ = true;
+	shotcooltime_ = 0;
+	PushingCount_ = 0;
+
+	isShot = false;
+	beforeIsShot = isShot;
+
+
+	targetW_.rotation_ = {0, 0, 0};
+	
+}
+
 void Player::Initialize(const std::vector<Model*>& models, const uint32_t HP) { 
 	input_ = Input::GetInstance();
 	BaseCharacter::Initialize(models, HP);
@@ -189,9 +220,9 @@ void Player::Move() {
 
 #ifdef _DEBUG
 	ImGui::Text("player");
-	ImGui::DragFloat3("position", &worldtransform_.translation_.x, 0.01f);
-	ImGui::DragFloat3("rotate", &worldtransform_.rotation_.x, 0.01f);
-	ImGui::DragFloat3("scale", &worldtransform_.scale_.x, 0.01f);
+	ImGui::DragFloat3("p position", &worldtransform_.translation_.x, 0.01f);
+	ImGui::DragFloat3("p rotate", &worldtransform_.rotation_.x, 0.01f);
+	ImGui::DragFloat3("p scale", &worldtransform_.scale_.x, 0.01f);
 
 	ImGui::Text("player stand area");
 	ImGui::Text("pos   : %4.1f/%4.1f/%4.1f", playerMoveW.translation_.x, 0.01f);
