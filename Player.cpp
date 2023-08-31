@@ -108,7 +108,13 @@ void Player::SetParent(const WorldTransform* world) {
 }
 
 
-void Player::OnCollision() { canBulletShot_ = false; }
+void Player::OnCollision() {
+	canBulletShot_ = false;
+	shotcooltime_ = 120;
+	if (--hp <= 0) {
+		isDead_ = true;
+	}
+}
 
 void Player::Attack() {
 	//スペースキーでレティクルに弾発射
@@ -240,17 +246,18 @@ void Player::Move() {
 	if (SetAreaEllipse(zero, pos, area, overvelo)) {
 
 		if (isShot) {
-			
-			if (PushingCount_ != 0) {
-				// 左右移動
-				targetW_.rotation_.y -= overvelo.x * maxMoveTheta / PushingCount_;
-				// 上下移動
-				playerMoveW.translation_.z += overvelo.y * moveNum / PushingCount_;
-			} else {
-				// 左右移動
-				targetW_.rotation_.y -= overvelo.x * maxMoveTheta / 2;
-				// 上下移動
-				playerMoveW.translation_.z += overvelo.y * moveNum / 2;
+			if (PushingCount_ != maxCount) {
+				if (PushingCount_ != 0) {
+					// 左右移動
+					targetW_.rotation_.y -= overvelo.x * maxMoveTheta / PushingCount_;
+					// 上下移動
+					playerMoveW.translation_.z += overvelo.y * moveNum / PushingCount_;
+				} else {
+					// 左右移動
+					targetW_.rotation_.y -= overvelo.x * maxMoveTheta / 2;
+					// 上下移動
+					playerMoveW.translation_.z += overvelo.y * moveNum / 2;
+				}
 			}
 		} else {
 			// 左右移動

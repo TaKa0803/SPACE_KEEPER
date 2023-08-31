@@ -2,6 +2,14 @@
 #include <Matrix4x4.h>
 #include <Vector3.h>
 #include<Vector2.h>
+
+struct esing {
+	Vector3 st;
+	Vector3 ed;
+};
+
+Vector3 ES(esing E, float t);
+
 int GetRandomNum(int wideOrmax, bool isWide);
 
 float CheckR_F_Y(const Vector2& v);

@@ -1,18 +1,29 @@
 #include<core.h>
 #include<cassert>
 #include<ImGuiManager.h>
-#include"math_matrix.h"
 #include<numbers>
+#include"GameScene.h"
 
-Vector3 ES(esing E, float t) {
-	return {
-	    E.st.x * (1.0f - t) + E.ed.x * t,
-	    E.st.y * (1.0f - t) + E.ed.y * t,
-	    E.st.z * (1.0f - t) + E.ed.z * t,
-	};
+void BCore::ShotNormal(float scale) { 
+	Vector3 velo;
+
+
+
+	velo = Normalize(Subtract(GetRHW(), GetR2CW()));
+
+	gameScene_->ShotEN(models_[12],GetRHW(),velo,scale); }
+
+void BCore::ShotChase(float scale) { 
+	Vector3 velo;
+	velo = Normalize(Subtract(GetLHW(), GetL2CW()));
+	gameScene_->ShotEC(models_[11], GetLHW(), velo,scale); 
 }
 
+
 void BCore::SetStart() {
+
+	SeeTarget();
+
 	hp_ = maxHP;
 	worldtransform_.translation_ = {0, 0, 0};
 	worldtransform_.scale_ = {5, 5, 5};
@@ -35,6 +46,26 @@ void BCore::SetStart() {
 	C_R1_.translation_ = {3.0f, 0, 0};
 	C_R2_.translation_ = {7.0f, 0, 0};
 
+	head_.rotation_ = {1.0f, 0, 0};
+	body_.rotation_ = {0, 0, 0};
+	leg_.rotation_ = {0, 0, 0};
+	LArm1_.rotation_ = {0, 0, 0};
+	LArm2_.rotation_ = {0, 0, 0};
+	RArm1_.rotation_ = {0, 0, 0};
+	RArm2_.rotation_ = {0, 0, 0};
+	Lhand_.rotation_ = {0, 0, 0};
+	Rhand_.rotation_ = {0, 0, 0};
+
+	C_center_.rotation_ = {0, 0, 0};
+	C_L1_.rotation_ = {0, 0, 1.5f};
+	C_L2_.rotation_ = {-1.5f, 0, 0};
+
+	C_R1_.rotation_ = {0, 0, -1.5f};
+	C_R2_.rotation_ = {-1.5f, 0, 0};
+
+	Lhand_.scale_ = {1, 1, 1};
+	Rhand_.scale_ = {1, 1, 1};
+
 	state_ = StateCore::Start;
 
 	weakC = WeakCore::L1;
@@ -44,6 +75,10 @@ void BCore::SetStart() {
 	T = 0;
 	firstAction_ = false;
 	isDead_ = false;
+
+	cgangecount = 0;
+
+	UpdateAllMatrix();
 }
 
 void BCore::Initialize(const std::vector<Model*>& models) {
@@ -110,8 +145,28 @@ void BCore::Initialize(const std::vector<Model*>& models) {
 	C_R1_.translation_ = {3.0f, 0, 0};
 	C_R2_.translation_ = {7.0f, 0, 0};
 
+	head_.rotation_ = {1.0f, 0, 0};
+	body_.rotation_ = {0, 0, 0};
+	leg_.rotation_ = {0, 0, 0};
+	LArm1_.rotation_ = {0, 0, 0};
+	LArm2_.rotation_ = {0, 0, 0};
+	RArm1_.rotation_ = {0, 0, 0};
+	RArm2_.rotation_ = {0, 0, 0};
+	Lhand_.rotation_ = {0, 0, 0};
+	Rhand_.rotation_ = {0, 0, 0};
+
+	C_center_.rotation_ = {0, 0, 0};
+	C_L1_.rotation_ = {0, 0, 1.5f};
+	C_L2_.rotation_ = {-1.5f, 0, 0};
+
+	C_R1_.rotation_ = {0, 0, -1.5f};
+	C_R2_.rotation_ = {-1.5f, 0, 0};
+
+	Lhand_.scale_ = {1, 1, 1};
+	Rhand_.scale_ = {1, 1, 1};
 	
-	
+
+	UpdateAllMatrix();
 }
 
 //プレイヤーのほうを向く
@@ -369,6 +424,10 @@ void BCore::Normal() {
 		ChaseBullet();
 		break;
 	case ATKtype::None:
+		//ShotNormal();
+		//ShotChase();
+
+
 		//何もしない
 		if (--nextATKCount <= 0) {
 			//アクションを起こす
@@ -376,13 +435,16 @@ void BCore::Normal() {
 
 			//ランダムで行動
 			if (num == 0) {
-				ATKType = ATKtype::Eye_Layzer;
+			//	ATKType = ATKtype::Eye_Layzer;
+				ATKType = ATKtype::Punch_missiles;
 			}
 			if (num == 1) {
-				ATKType = ATKtype::Eye_Layzer;
+			//	ATKType = ATKtype::Eye_Layzer;
+				ATKType = ATKtype::Punch_missiles;
 			}
 			if (num == 2) {
-				ATKType = ATKtype::Eye_Layzer;
+			//	ATKType = ATKtype::Eye_Layzer;
+				ATKType = ATKtype::Punch_missiles;
 			}
 			if (num == 3) {
 				ATKType = ATKtype::Punch_missiles;
@@ -400,11 +462,11 @@ void BCore::Normal() {
 				ATKType = ATKtype::Armswinging;
 			}
 			if (num == 8) {
-				ATKType = ATKtype::Beam;
+				//ATKType = ATKtype::Beam;
+				ATKType = ATKtype::Punch_missiles;
 			}
 			if (num == 9) {
-				ATKType = ATKtype::None;
-				nextATKCount = maxATKWait;
+				ATKType = ATKtype::Armswinging;
 			}
 
 			if (num == 10) {
@@ -422,7 +484,8 @@ void BCore::Normal() {
 			if (num == 14) {
 				ATKType = ATKtype::ChaseBullet;
 			}
-			ATKType = ATKtype::ChaseBullet;
+			
+			//ATKType = ATKtype::Punch_missiles;
 
 			SeeTarget();
 			//フラグ処理の初期化
@@ -665,6 +728,10 @@ void BCore::Punch_M() {
 			CR2_ = {
 			    C_R2_.rotation_, {0, -0.2f, 0}
             };
+
+			Stock1_ = {
+			    Rhand_.scale_, {2, 2, 2}
+            };
 		} else {
 			// 設定したら更新
 			head_.rotation_ = ES(H_, T);
@@ -683,6 +750,8 @@ void BCore::Punch_M() {
 			C_L2_.rotation_ = ES(CL2_, T);
 			C_R1_.rotation_ = ES(CR1_, T);
 			C_R2_.rotation_ = ES(CR2_, T);
+
+			Rhand_.scale_ = ES(Stock1_, T);
 
 			// T追加
 			T += addAttackT/2;
@@ -732,7 +801,8 @@ void BCore::Punch_M() {
 			    C_R2_.rotation_, {0, -0.55f, 0}
             };
 
-			Rhand_.scale_ = {0, 0, 0};
+			Rhand_.scale_ = {0.01f, 0.01f, 0.01f};
+			ShotCount = 0;
 		} else {
 			// 設定したら更新
 			head_.rotation_ = ES(H_, T);
@@ -752,6 +822,10 @@ void BCore::Punch_M() {
 			C_R1_.rotation_ = ES(CR1_, T);
 			C_R2_.rotation_ = ES(CR2_, T);
 
+			if (ShotCount == 0) {
+				ShotNormal(2);
+			}
+			ShotCount++;
 			// T追加
 			T += addAttackT*2;
 			if (T > 1.0f) {
@@ -1121,7 +1195,7 @@ void BCore::ArmSwing() {
 			T = 0;
 
 			//何回転するか
-			float R_Y = ((float)std::numbers::pi * 2) * 5.0f;
+			float R_Y = ((float)std::numbers::pi * 2) * 2.0f;
 
 			H_ = {head_.rotation_, head_.rotation_};
 			B_ = {body_.rotation_, {0,R_Y,0}};
@@ -1149,6 +1223,8 @@ void BCore::ArmSwing() {
 			CR2_ = {
 			    C_R2_.rotation_, {0, 0, 0}
             };
+
+			ShotCount = 0;
 		} else {
 			// 設定したら更新
 			head_.rotation_ = ES(H_, T);
@@ -1167,6 +1243,33 @@ void BCore::ArmSwing() {
 			C_L2_.rotation_ = ES(CL2_, T);
 			C_R1_.rotation_ = ES(CR1_, T);
 			C_R2_.rotation_ = ES(CR2_, T);
+
+			if (Getangly()) {
+				if (T != 0) {
+
+					if (ShotCount % 21 == 0) {
+						ShotNormal(1);
+					}
+
+					if (ShotCount % 80 == 0) {
+						ShotChase(1);
+					}
+				}
+
+			} else {
+				if (T != 0) {
+
+					if (ShotCount % 50==0) {
+						ShotNormal(1);
+					}
+
+					if (ShotCount % 120==0) {
+						ShotChase(1);
+					}
+				}
+			}
+
+			ShotCount++;
 
 			// T追加
 			T +=1.0f/300.0f;
@@ -1344,7 +1447,9 @@ void BCore::ChaseBullet() {
             };
 
 			Lhand_.scale_ = {0, 0, 0};
+			ShotCount = 0;
 		} else {
+			SeeTarget();
 			// 設定したら更新
 			head_.rotation_ = ES(H_, T);
 			body_.rotation_ = ES(B_, T);
@@ -1363,8 +1468,21 @@ void BCore::ChaseBullet() {
 			C_R1_.rotation_ = ES(CR1_, T);
 			C_R2_.rotation_ = ES(CR2_, T);
 
+
+			if (Getangly()) {
+				if (ShotCount % 10 == 0) {
+					ShotChase(1);
+				}
+			} else {
+				if (ShotCount % 30 == 0) {
+					ShotChase(1);
+				}
+			}
+			ShotCount++;
+
 			// T追加
-			T += addAttackT;
+			T += 1.0f / 60.0f;
+			
 			if (T > 1.0f) {
 				T = 0;
 				firstAction_ = false;
@@ -1434,7 +1552,7 @@ void BCore::ChaseBullet() {
 				MoveWave_ = MoveE::attackWait;
 				// シーン変換
 				ATKType = ATKtype::None;
-				nextATKCount = maxATKWait;
+				nextATKCount = maxATKWait/2;
 			}
 		}
 #pragma endregion
@@ -1469,7 +1587,12 @@ void BCore::Move() {
 }
 
 void BCore::Update() { 
-	
+	if (Getangly()) {
+		maxATKWait = 60;
+
+	} else {
+		maxATKWait = 120;
+	}
 	Move();
 #ifdef _DEBUG
 	ImGui::Begin("Core");
@@ -1537,6 +1660,28 @@ void BCore::InCollision() {
 	hp_--;
 	if (hp_ <= 0) {
 		isDead_ = true;
+	}
+}
+
+void BCore::ChangeCorePos() { cgangecount++;
+	if (cgangecount >= 60 * 5) {
+		cgangecount = 0;
+		int num = GetRandomNum(5, false);
+		if (num == 0) {
+			weakC = WeakCore::center_;
+		}
+		if (num == 1) {
+			weakC = WeakCore::L1;
+		}
+		if (num == 2) {
+			weakC = WeakCore::L2;
+		}
+		if (num == 3) {
+			weakC = WeakCore::R1;
+		}
+		if (num == 4) {
+			weakC = WeakCore::R2;
+		}
 	}
 }
 

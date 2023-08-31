@@ -1,4 +1,5 @@
 #pragma once
+#include"EnemyBullet.h"
 
 #include "Audio.h"
 #include "DirectXCommon.h"
@@ -16,7 +17,7 @@
 #include<sstream>
 #include"core.h"
 #include <list>
-#include"Enemy.h"
+
 #include"title.h"
 #include"Plane.h"
 
@@ -70,6 +71,11 @@ public: // メンバ関数
 
 	void SetStartUP();
 
+
+	void ShotEN(Model* model, const Vector3 pos, const Vector3 velo, float scale);
+
+	void ShotEC(Model* model, const Vector3 pos, const Vector3 velo, float scale);
+
 private:
 #pragma region 各種クラス内呼び出し関数
 	void LoadModel();
@@ -79,8 +85,7 @@ private:
 	void DrawSprite();
 
 	
-	void AddEnemy(Vector3 pos);
-
+	
 	void TitlrUpdate();
 
 	void InGameUpdate();
@@ -134,9 +139,8 @@ private:
 
 	std::unique_ptr<BCore> core_ = nullptr;
 
-	//敵
-	std::list<Enemy*> enemy_;
-
+	std::list<EnemyBullet*> enemyBullets_;
+	
 	std::unique_ptr<TitleS> title_ = nullptr;
 
 
@@ -193,6 +197,9 @@ private:
 	std::unique_ptr<Model> eR1A_;
 	std::unique_ptr<Model> eR2A_;
 	std::unique_ptr<Model> eRhand_;
+
+	std::unique_ptr<Model> eLammo_;
+	std::unique_ptr<Model> eRammo_;
 
 #pragma endregion
 

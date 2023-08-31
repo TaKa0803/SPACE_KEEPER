@@ -2,6 +2,7 @@
 #include<Model.h>
 #include<WorldTransform.h>
 #include"BaseCharacter.h"
+#include"math_matrix.h"
 
 //敵の行動状態
 enum class StateCore {
@@ -31,11 +32,7 @@ enum class MoveE {
 	back,
 };
 
-struct esing {
-	Vector3 st;
-	Vector3 ed;
 
-};
 
 
 enum class ATKtype {
@@ -143,9 +140,26 @@ public:
 
 	void SetStart();
 
+	uint32_t GetHP() { return hp_; }
+
+	bool Getangly() {
+		if (hp_ <= maxHP / 2) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+
+	Vector3 GetLHW() {
+		return {Lhand_.matWorld_.m[3][0], Lhand_.matWorld_.m[3][1], Lhand_.matWorld_.m[3][2]};
+	}
+	Vector3 GetRHW() {
+		return {Rhand_.matWorld_.m[3][0], Rhand_.matWorld_.m[3][1], Rhand_.matWorld_.m[3][2]};
+	}
+
 private:
 
-	
 
 	void Start();
 
@@ -166,7 +180,27 @@ private:
 	void ArmSwing();
 
 	void ChaseBullet();
+
+
+
+	void ShotNormal(float scale);
+	void ShotChase(float scale);
+
+	
+
+	Vector3 GetL2CW() {
+		return {C_L2_.matWorld_.m[3][0], C_L2_.matWorld_.m[3][1], C_L2_.matWorld_.m[3][2]};
+	}
+	Vector3 GetR2CW() {
+		return {C_R2_.matWorld_.m[3][0], C_R2_.matWorld_.m[3][1], C_R2_.matWorld_.m[3][2]};
+	}
+
+	Vector3 GetPlayer() {
+		return {player_->matWorld_.m[3][0], player_->matWorld_.m[3][1], player_->matWorld_.m[3][2]};
+	}
 #pragma region Animation
+
+
 
 	//攻撃予備動作
 	float T = 0;
@@ -197,6 +231,8 @@ private:
 	esing Stock3_;
 #pragma endregion
 
+	int ShotCount = 0;
+
 	uint32_t WaitShotBeam = 0;
 
 	//初期化
@@ -210,7 +246,7 @@ private:
 
 	uint32_t nextATKCount = 60;
 
-	const uint32_t maxATKWait = 180;
+	uint32_t maxATKWait = 180;
 
 	const N_R NorRotate_ = {
 	    .H{0, 0,     0    },
@@ -256,6 +292,9 @@ private:
 		};
 	}
 
+	void ChangeCorePos();
+
+	int32_t cgangecount = 0;
 	
 	
 	WorldTransform head_;

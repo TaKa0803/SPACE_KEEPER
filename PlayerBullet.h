@@ -24,6 +24,9 @@ public:
 
 	bool IsDead() const { return isdead_; }
 
+	void SetDead() { isdead_ = true; }
+
+
 	// 当たったら呼び出されるCB関数
 	void OnCollision() { isdead_ = true; };
 

@@ -5,6 +5,16 @@
 #include<iostream>
 #include <time.h>
 
+
+
+Vector3 ES(esing E, float t) {
+	return {
+	    E.st.x * (1.0f - t) + E.ed.x * t,
+	    E.st.y * (1.0f - t) + E.ed.y * t,
+	    E.st.z * (1.0f - t) + E.ed.z * t,
+	};
+}
+
 int GetRandomNum(int wideOrmax,bool isWide) { 
 	unsigned int curtime = (unsigned int)time(nullptr);
 	srand(curtime);

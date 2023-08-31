@@ -12,8 +12,9 @@ GameScene::~GameScene() {
 		bullet =nullptr;
 	}
 
-	for (Enemy* enemy : enemy_) {
-		delete enemy;
+	for (EnemyBullet* eb : enemyBullets_) {
+		delete eb;
+		eb = nullptr;
 	}
 }
 
@@ -76,6 +77,9 @@ void GameScene::LoadModel() {
 
 	theCore_.reset(Model::CreateFromOBJ("WeakP"));
 	weekCore_.reset(Model::CreateFromOBJ("WeekRED"));
+
+	eLammo_.reset(Model::CreateFromOBJ("Lammo"));
+	eRammo_.reset(Model::CreateFromOBJ("Rammo"));
 }
 
 //クラスのロードまとめ
@@ -88,8 +92,10 @@ void GameScene::LoadClass() {
 
 
 	std::vector<Model*> CoreModels = {ehead_.get(),  ebody_.get(),  eleg.get(),  eL1A_.get(),
-	                                  eL2A_.get(),   eLhand_.get(), eR1A_.get(), eR2A_.get(),
-	                                  eRhand_.get(), theCore_.get(), weekCore_.get()};
+	                                  eL2A_.get(),   eLhand_.get(),  eR1A_.get(),     eR2A_.get(),
+	                                  eRhand_.get(), theCore_.get(), weekCore_.get(), eLammo_.get(),
+	                                  eRammo_.get()
+	};
 
 	// 巨大ボスのコア
 	core_ = std::make_unique<BCore>();
@@ -132,12 +138,15 @@ void GameScene::LoadClass() {
 //画像ロード
 void GameScene::LoadTexture() { basicTex_ = TextureManager::Load("uvChecker.png"); }
 
-void GameScene::SetStartUP() { 
+void GameScene::SetStartUP() 
+{ 
+	title_->SetStartSta();
 	player_->SetStart();
 	player_->SetParent(&title_->GetRW());
 	camera_->Setfar(-10.0f);
+	
+	
 	core_->SetStart();
-	title_->SetStartSta();
 }
 
 //プレイヤーの弾追加
@@ -146,11 +155,20 @@ void GameScene::AddPlayerBullet(PlayerBullet* playerBullet) {
 	playerbullets_.push_back(playerBullet);
 }
 
-void GameScene::AddEnemy(Vector3 pos) {
-	Enemy* enemy = new Enemy();
-	enemy->Initialize(enemyModels_,1,pos);
-	enemy->SetgameScene(this);
-	enemy_.push_back(enemy);
+void GameScene::ShotEN(Model* model, const Vector3 pos, const Vector3 velo,float scale) {
+	EnemyBullet* newEB = new EnemyBullet();
+
+	bool angry = core_->Getangly();
+
+	newEB->Initialize(model, pos, velo, &player_->GetWorldTransform(), BType::Normal,angry,scale);
+	enemyBullets_.push_back(newEB);
+}
+
+void GameScene::ShotEC(Model* model, const Vector3 pos, const Vector3 velo,float scale) {
+	EnemyBullet* newEB = new EnemyBullet();
+	bool angry = core_->Getangly();
+	newEB->Initialize(model, pos, velo, &player_->GetWorldTransform(), BType::Chase,angry,scale);
+	enemyBullets_.push_back(newEB);
 }
 
 void GameScene::EndAnime() {
@@ -222,15 +240,17 @@ void GameScene::TitlrUpdate() {
 
 	//最初以外更新する
 	if (title_->GetScene() ==Scene::normal||title_->GetScene()==Scene::endAnimation) {
-		plane_E->Update();
+		//plane_E->Update();
 		core_->Update();
 	}
 
+	core_->Update();
 
 	camera_->Update();
 	view_.matView = camera_->GetView().matView;
 	view_.matProjection = camera_->GetView().matProjection;
 	view_.TransferMatrix();
+
 
 #pragma region 自分の弾更新
 	// 自分の弾の更新
@@ -239,6 +259,7 @@ void GameScene::TitlrUpdate() {
 	}
 #pragma endregion
 	
+
 #pragma region 
 	// 当たり判定
 	if (!title_->IsPlay()) {
@@ -246,7 +267,7 @@ void GameScene::TitlrUpdate() {
 			
 				Vector3 Bpos = bullet->GetWorldT();
 
-				if (-20 <= Bpos.x && Bpos.x <= 20 && -10 <= Bpos.y && Bpos.y <= 10 &&
+				if (-20 <= Bpos.x && Bpos.x <= 20 && -10 <= Bpos.y && Bpos.y <= 15 &&
 				    -305 <= Bpos.z && Bpos.z <= -295) {
 					bullet->OnCollision();
 					title_->OnCollision();
@@ -285,32 +306,47 @@ void GameScene::InGameUpdate() {
 	view_.matProjection = camera_->GetView().matProjection;
 	view_.TransferMatrix();
 
-#pragma region 敵
-	for (Enemy* enemy : enemy_) {
-		enemy->Update();
-	}
-#pragma endregion
+
 #pragma region 自分の弾更新
 	// 自分の弾の更新
 	for (PlayerBullet* bullet : playerbullets_) {
 		bullet->Update();
 	}
 #pragma endregion
+	for (EnemyBullet* eb : enemyBullets_) {
+		eb->Update();
+	}
+
+
 	CheckAllCollision();
 
 	
 	//しんだらシーン変換
 	if (core_->IsDead()) {
+
+
+		for (PlayerBullet* bullet : playerbullets_) {
+			    bullet->SetDead();
+		}
+
+		for (EnemyBullet* eb : enemyBullets_) {
+			    eb->SetDead();
+		}
+		
+
 		scene_ = GScene::Clear;
 	}
 	
 }
 
 void GameScene::ClearUpdate() { 
+	
 	if (joyState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) {
-		scene_ = GScene::Title;
 		
+		scene_ = GScene::Title;
 		SetStartUP();
+
+		
 	}
 
 }
@@ -353,19 +389,7 @@ void GameScene::CheckAllCollision() {
 	//プレイヤー座標
 	Vector3 posP = player_->GetmatPos();
 	
-	#pragma region 自分の弾と敵キャラの当たり判定
-	for (Enemy* enemy : enemy_) {
-		for (PlayerBullet* bullet : playerbullets_) {
-			Vector3 Bpos = bullet->GetWorldT();
-			if (CheckHitSphere(enemy->GetmatPos(), Bpos, 1, 1)) {
-				// 敵の当たり判定
-				enemy->OnCollision();
-				// 弾の判定
-				bullet->OnCollision();
-			}
-		}
-	}
-#pragma endregion
+	
 #pragma region 自分の弾とコアとの当たり判定
 	for (PlayerBullet* bullet : playerbullets_) {
 		Vector3 Bpos = bullet->GetWorldT();
@@ -382,19 +406,14 @@ void GameScene::CheckAllCollision() {
 #pragma endregion
 	
 
+	if (input_->TriggerKey(DIK_P)) {
+		for (int i = 0; i < 500; i++) {
+			core_->InCollision();
+		}
+	}
 }
 
 void GameScene::UpdateDelete() {
-
-	// 死亡チェック
-	enemy_.remove_if([](Enemy* enemy) {
-		if (enemy->IsDead()) {
-			delete enemy;
-			return true;
-		}
-		return false;
-	});
-
 	// 弾の時間経過削除
 	playerbullets_.remove_if([](PlayerBullet* bullet) {
 		if (bullet->IsDead()) {
@@ -404,6 +423,14 @@ void GameScene::UpdateDelete() {
 		return false;
 	});
 
+	enemyBullets_.remove_if([](EnemyBullet* eb) {
+		if (eb->IsDead()) {
+			delete eb;
+			return true;
+		} else {
+			return false;
+		}
+	});
 }
 
 
@@ -452,8 +479,6 @@ void GameScene::Draw() {
 
 
 
-
-
 //モデルの描画
 void GameScene::DrawModel() { 
 	//天球
@@ -464,7 +489,7 @@ void GameScene::DrawModel() {
 		title_->Draw(view_);
 		if (title_->GetScene() != Scene::start ||title_->GetScene() != Scene::startAnimation) {
 			//タイトルアニメーション終わってから描画
-			plane_->Draw(view_);
+			//plane_->Draw(view_);
 			player_->Draw(view_);
 
 			for (PlayerBullet* bullet : playerbullets_) {
@@ -472,25 +497,32 @@ void GameScene::DrawModel() {
 			}		
 		}
 		if (title_->GetScene() != Scene::start && title_->GetScene() != Scene::startAnimation) {
-			plane_E->Draw(view_);
-			core_->Draw(view_);
+			//plane_E->Draw(view_);
+			//core_->Draw(view_);
 		}
-		
+
+		//plane_E->Draw(view_);
+		core_->Draw(view_);
+		for (EnemyBullet* eb : enemyBullets_) {
+			eb->Draw(view_);
+		}
 		break;
 	case GScene::InGame:
-		plane_->Draw(view_);
-		plane_E->Draw(view_);
+	//	plane_->Draw(view_);
+	//	plane_E->Draw(view_);
 		
 		player_->Draw(view_);
 		core_->Draw(view_);
 
-		for (Enemy* enemy : enemy_) {
-			enemy->Draw(view_);
-		}
+		
 
 		for (PlayerBullet* bullet : playerbullets_) {
 			bullet->Draw(view_);
 		}
+		for (EnemyBullet* eb : enemyBullets_) {
+			eb->Draw(view_);
+		}
+
 		break;
 	case GScene::Clear:
 		break;
