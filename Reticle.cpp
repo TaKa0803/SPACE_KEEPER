@@ -16,6 +16,10 @@ void Reticle::Initialize(Model* model, const WorldTransform& parent) {
 	reticleWorld_.parent_ = &parent;
 
 	model_ = model;
+
+
+	
+
 }
 
 void Reticle::DrawSPrite() { R2D_->Draw(); }

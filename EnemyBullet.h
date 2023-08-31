@@ -34,6 +34,7 @@ public:
 
 	float GetScale() { return world_.scale_.x; }
 	
+	void OnCollision() { isDead_ = true; }
 
 
 private:

@@ -32,7 +32,19 @@ void GameScene::Initialize() {
 	clear_ = TextureManager::Load("Clear.png");
 	sprite_.reset(Sprite::Create(clear_, {0, 0}));
 	
+	gametex_ = TextureManager::Load("Gameover.png");
+	gameoverSprite_.reset(Sprite::Create(gametex_, {0,0}));
+
+
 	red_ = TextureManager::Load("Weak.png");
+
+	Rtex_ = TextureManager::Load("Rkey.png");
+	Rtexsp_.reset(Sprite::Create(Rtex_, {900,520}));
+
+	
+
+		
+
 }
 
 //モデルのロードまとめ
@@ -332,9 +344,19 @@ void GameScene::InGameUpdate() {
 		for (EnemyBullet* eb : enemyBullets_) {
 			    eb->SetDead();
 		}
-		
-
 		scene_ = GScene::Clear;
+	}
+
+	if (player_->IsDead()) {
+		for (PlayerBullet* bullet : playerbullets_) {
+			    bullet->SetDead();
+		}
+
+		for (EnemyBullet* eb : enemyBullets_) {
+			    eb->SetDead();
+		}
+		scene_ = GScene::GameOver;
+	
 	}
 	
 }
@@ -350,6 +372,13 @@ void GameScene::ClearUpdate() {
 	}
 
 }
+void GameScene::GameOverUpdate() {
+	if (joyState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) {
+		scene_ = GScene::Title;
+		SetStartUP();
+	}
+}
+
 
 //更新処理
 void GameScene::Update() { 
@@ -366,6 +395,8 @@ void GameScene::Update() {
 	case GScene::Clear:
 		ClearUpdate();
 		break;
+	case GScene::GameOver:
+		GameOverUpdate();
 	default:
 		break;
 	}
@@ -404,7 +435,19 @@ void GameScene::CheckAllCollision() {
 		}
 	}
 #pragma endregion
-	
+#pragma region 自機と敵の弾の当たり判定
+	for (EnemyBullet* eb : enemyBullets_) {
+		Vector3 epos = eb->GetW();
+		if (CheckHitSphere(player_->GetmatPos(), epos, 0.5f, 5 * eb->GetScale())) {
+			player_->OnCollision();
+
+			eb->OnCollision();
+		}
+	}
+#pragma endregion
+
+
+
 
 	if (input_->TriggerKey(DIK_P)) {
 		for (int i = 0; i < 500; i++) {
@@ -526,6 +569,9 @@ void GameScene::DrawModel() {
 		break;
 	case GScene::Clear:
 		break;
+	case GScene::GameOver:
+		break;
+
 	default:
 		break;
 	}
@@ -537,12 +583,16 @@ void GameScene::DrawSprite() {
 
 	switch (scene_) {
 	case GScene::Title:
+		
 		player_->DrawUI();
+
+		Rtexsp_->Draw();
 		break;
 	case GScene::TitleToIngame:
 		break;
 	case GScene::InGame:
 		player_->DrawUI();
+		core_->DrawSprite();
 		break;
 	case GScene::InGameToClear:
 		break;
@@ -551,6 +601,10 @@ void GameScene::DrawSprite() {
 		break;
 	case GScene::BackTitle:
 		break;
+	case GScene::GameOver:
+		gameoverSprite_->Draw();
+		break;
+
 	default:
 		break;
 	}

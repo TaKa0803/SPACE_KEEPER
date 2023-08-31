@@ -3,6 +3,7 @@
 #include<WorldTransform.h>
 #include"BaseCharacter.h"
 #include"math_matrix.h"
+#include"Sprite.h"
 
 //敵の行動状態
 enum class StateCore {
@@ -74,6 +75,8 @@ public:
 	void Update()override;
 
 	void Draw(const ViewProjection& view)override;
+
+	void DrawSprite();
 
 	void InCollision();
 
@@ -315,4 +318,10 @@ private:
 	WorldTransform C_R1_;
 	WorldTransform C_R2_;
 
+
+	uint32_t HPtex_;
+	uint32_t HPNonetex_;
+
+
+	Sprite* hptexsprite[10];
 };

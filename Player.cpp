@@ -7,6 +7,7 @@
 
 void Player::SetStart() {
 	hp_ = 10;
+	isDead_ = false;
 	worldtransform_.translation_ = {0, -3.5f, 0};
 	worldtransform_.rotation_ = {0, 0, 0};
 	worldtransform_.scale_ = {1, 1, 1};
@@ -80,6 +81,19 @@ void Player::Initialize(const std::vector<Model*>& models, const uint32_t HP) {
 
 	jettpack_.parent_ = &bodyW_;
 	fire_.parent_ = &jettpack_;
+
+	const int texheight = 720 - 40;
+
+	float x = 1280.0f - (64.0f * 10.0f);
+	x /= 2;
+
+	hptex_ = TextureManager::Load("HPplayer.png");
+
+	for (int i = 0; i < 10; i++) {
+		hpsprite[i] =
+		    Sprite::Create(hptex_, {x + 64 * i, texheight}, {1.0f, 1.0f, 1.0f, 1.0f}, {0.5f, 0.5f});
+	}
+
 }
 
 void Player::GetStatus() {
@@ -111,7 +125,7 @@ void Player::SetParent(const WorldTransform* world) {
 void Player::OnCollision() {
 	canBulletShot_ = false;
 	shotcooltime_ = 120;
-	if (--hp <= 0) {
+	if (--hp_ <= 0) {
 		isDead_ = true;
 	}
 }
@@ -457,4 +471,22 @@ void Player::Draw(const ViewProjection& view) {
 	}
 }
 
-void Player::DrawUI() { reticle_->DrawSPrite(); }
+void Player::DrawUI() { 
+	
+	reticle_->DrawSPrite();
+
+
+	for (int i = 0; i < (int)hp_; i++) {
+		const int texheight = 720 - 40;
+
+		float x = 1280.0f - (64.0f * (float)hp_);
+		x /= 2;
+
+		Vector2 pos = {x+64*i, texheight};
+		hpsprite[i]->SetPosition(pos);
+
+		hpsprite[i]->Draw();
+		
+	}
+
+}

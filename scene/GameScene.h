@@ -29,6 +29,7 @@ enum class GScene {
 	InGameToClear,
 	Clear,
 	BackTitle,
+	GameOver,
 };
 
 
@@ -92,6 +93,7 @@ private:
 	
 	void ClearUpdate();
 
+	void GameOverUpdate();
 
 	void EndAnime();
 #pragma endregion
@@ -216,6 +218,12 @@ private:
 	std::unique_ptr<Sprite> sprite_ = nullptr;
 
 	uint32_t red_;
+
+	uint32_t gametex_;
+	std::unique_ptr<Sprite> gameoverSprite_ = nullptr;
+
+	uint32_t Rtex_;
+	std::unique_ptr<Sprite> Rtexsp_ = nullptr;
 #pragma endregion
 
 	

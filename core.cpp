@@ -85,6 +85,22 @@ void BCore::Initialize(const std::vector<Model*>& models) {
 	//assert(model);
 	BaseCharacter::Initialize(models, maxHP);
 	
+
+	HPtex_ = TextureManager::Load("HP.png");
+	HPNonetex_ = TextureManager::Load("HP.png");
+
+	const int texheight = 40;
+
+	float x = 1280.0f - (64.0f * 10.0f);
+	x /= 2;
+
+	for (int i = 0; i < 10; i++) {
+
+		hptexsprite[i] =
+		    Sprite::Create(HPtex_, {x+64*i, texheight}, {1.0f, 1.0f, 1.0f, 1.0f}, {0.5f, 0.5f});
+	}
+	
+
 	worldtransform_.translation_ = {0, 0, 0};
 	worldtransform_.scale_ = {5, 5, 5};
 
@@ -1594,6 +1610,8 @@ void BCore::Update() {
 		maxATKWait = 120;
 	}
 	Move();
+
+	ChangeCorePos();
 #ifdef _DEBUG
 	ImGui::Begin("Core");
 	ImGui::DragFloat3("pos", &worldtransform_.translation_.x, 0.01f);
@@ -1657,7 +1675,10 @@ void BCore::UpdateAllMatrix() {
 }
 
 void BCore::InCollision() { 
-	hp_--;
+	for (int i = 0; i < 4; i++) {
+		hp_--;
+	}
+
 	if (hp_ <= 0) {
 		isDead_ = true;
 	}
@@ -1729,4 +1750,158 @@ void BCore::Draw(const ViewProjection& view) {
 		models_[9]->Draw(C_R2_, view);
 	}
 	
+}
+
+void BCore::DrawSprite() {
+
+	
+
+	if (hp_ <= (maxHP / 10)) {
+		const int texheight = 20;
+
+		float x = 1280.0f - (64.0f);
+		x /= 2;
+
+		for (int i = 0; i < 1; i++) {
+			Vector2 pos = {x, texheight};
+			hptexsprite[i]->SetPosition(pos);
+
+			hptexsprite[i]->Draw();
+		}
+
+	} else if(hp_ <= (maxHP / 10)*2){
+		int num = 2;
+
+		const int texheight = 20;
+
+		float x = 1280.0f - (64.0f * (float)num);
+		x /= 2;
+
+		for (int i = 0; i < num; i++) {
+			Vector2 pos = {x+64*i, texheight};
+			hptexsprite[i]->SetPosition(pos);
+
+			hptexsprite[i]->Draw();
+		}
+
+	} else if (hp_ <= (maxHP / 10) * 3) {
+		int num = 3;
+
+		const int texheight = 20;
+
+		float x = 1280.0f - (64.0f * (float)num);
+		x /= 2;
+
+		for (int i = 0; i < num; i++) {
+			Vector2 pos = {x + 64 * i, texheight};
+			hptexsprite[i]->SetPosition(pos);
+
+			hptexsprite[i]->Draw();
+		}
+	} else if (hp_ <= (maxHP / 10) * 4) {
+		int num = 4;
+
+		const int texheight = 20;
+
+		float x = 1280.0f - (64.0f * (float)num);
+		x /= 2;
+
+		for (int i = 0; i < num; i++) {
+			Vector2 pos = {x + 64 * i, texheight};
+			hptexsprite[i]->SetPosition(pos);
+
+			hptexsprite[i]->Draw();
+		}
+	} else if (hp_ <= (maxHP / 10) * 5) {
+		int num = 5;
+
+		const int texheight = 20;
+
+		float x = 1280.0f - (64.0f * (float)num);
+		x /= 2;
+
+		for (int i = 0; i < num; i++) {
+			Vector2 pos = {x + 64 * i, texheight};
+			hptexsprite[i]->SetPosition(pos);
+
+			hptexsprite[i]->Draw();
+		}
+	} else if (hp_ <= (maxHP / 10) * 6) {
+		int num = 6;
+
+		const int texheight = 20;
+
+		float x = 1280.0f - (64.0f * (float)num);
+		x /= 2;
+
+		for (int i = 0; i < num; i++) {
+			Vector2 pos = {x + 64 * i, texheight};
+			hptexsprite[i]->SetPosition(pos);
+
+			hptexsprite[i]->Draw();
+		}
+	} else if (hp_ <= (maxHP / 10) * 7) {
+		int num = 7;
+
+		const int texheight = 20;
+
+		float x = 1280.0f - (64.0f * (float)num);
+		x /= 2;
+
+		for (int i = 0; i < num; i++) {
+			Vector2 pos = {x + 64 * i, texheight};
+			hptexsprite[i]->SetPosition(pos);
+
+			hptexsprite[i]->Draw();
+		}
+	} else if (hp_ <= (maxHP / 10) * 8) {
+		int num = 8;
+
+		const int texheight = 20;
+
+		float x = 1280.0f - (64.0f * (float)num);
+		x /= 2;
+
+		for (int i = 0; i < num; i++) {
+			Vector2 pos = {x + 64 * i, texheight};
+			hptexsprite[i]->SetPosition(pos);
+
+			hptexsprite[i]->Draw();
+		}
+	} else if (hp_ <= (maxHP / 10) * 9) {
+		int num = 9;
+
+		const int texheight = 20;
+
+		float x = 1280.0f - (64.0f * (float)num);
+		x /= 2;
+
+		for (int i = 0; i < num; i++) {
+			Vector2 pos = {x + 64 * i, texheight};
+			hptexsprite[i]->SetPosition(pos);
+
+			hptexsprite[i]->Draw();
+		}
+	} else if (hp_ <= (maxHP / 10) * 10) {
+		int num = 10;
+
+		const int texheight = 20;
+
+		float x = 1280.0f - (64.0f * (float)num);
+		x /= 2;
+
+		for (int i = 0; i < num; i++) {
+			Vector2 pos = {x + 64 * i, texheight};
+			hptexsprite[i]->SetPosition(pos);
+
+			hptexsprite[i]->Draw();
+		}
+	}
+
+	
+
+	
+
+	
+
 }

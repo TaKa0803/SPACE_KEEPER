@@ -69,6 +69,7 @@ private:
 		    playerMoveW.matWorld_.m[3][2]};
 	}
 
+
 	void Attack();
 #pragma endregion
 
@@ -137,4 +138,7 @@ private:
 	WorldTransform jettpack_;
 	WorldTransform fire_;
 	
+	Sprite* hpsprite[10];
+
+	uint32_t hptex_;
 };
