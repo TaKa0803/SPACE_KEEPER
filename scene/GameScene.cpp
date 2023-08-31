@@ -445,15 +445,6 @@ void GameScene::CheckAllCollision() {
 		}
 	}
 #pragma endregion
-
-
-
-
-	if (input_->TriggerKey(DIK_P)) {
-		for (int i = 0; i < 500; i++) {
-			core_->InCollision();
-		}
-	}
 }
 
 void GameScene::UpdateDelete() {
