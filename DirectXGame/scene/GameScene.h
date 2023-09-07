@@ -161,13 +161,8 @@ private:
 	std::vector<Model*> enemyModels_;
 
 	
-
-	std::unique_ptr<Model> pbody_;
-	std::unique_ptr<Model> phead_;
-	std::unique_ptr<Model> plhand_;
-	std::unique_ptr<Model> prhand_;
-	std::unique_ptr<Model> plleg_;
-	std::unique_ptr<Model> prleg_;
+	std::unique_ptr<Model> playerModel[partsNum];
+	
 
 	std::unique_ptr<Model> pweapon_;
 

@@ -9,6 +9,27 @@
 
 class GameScene;
 
+const int32_t partsNum = 15;
+
+enum Parts{
+	Body,
+	BodyUnder,
+	Head,	
+	LArm1,
+	LArm2,
+	LHand,	
+	RArm1,
+	RArm2,
+	RHand,
+	LLeg1,
+	LLeg2,
+	LFoot,
+	RLeg1,
+	RLeg2,
+	RFoot,
+};
+
+
 class Player : public BaseCharacter {
 public:
 	/// <summary>
@@ -73,6 +94,10 @@ private:
 	void Attack();
 #pragma endregion
 
+	
+	WorldTransform parts[partsNum];
+
+
 	// キー入力
 	Input* input_ = nullptr;
 
@@ -128,17 +153,11 @@ private:
 	bool beforeIsShot = isShot;
 
 	WorldTransform bodyW_;
-	WorldTransform headW_;
-	WorldTransform LhandW_;
-	WorldTransform RhandW_;
-	WorldTransform LlegW_;
-	WorldTransform RlegW_;
-	WorldTransform weaponW_;
 
-	WorldTransform jettpack_;
-	WorldTransform fire_;
 	
 	Sprite* hpsprite[10];
 
 	uint32_t hptex_;
+
+
 };

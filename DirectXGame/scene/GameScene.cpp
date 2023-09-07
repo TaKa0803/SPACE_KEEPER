@@ -57,17 +57,32 @@ void GameScene::LoadModel() {
 
 	enemyModels_ = {baseModel_.get()};
 
-	pbody_.reset(Model::CreateFromOBJ("PBody"));
-	phead_.reset(Model::CreateFromOBJ("Phead"));
-	plhand_.reset(Model::CreateFromOBJ("PLhand"));
-	prhand_.reset(Model::CreateFromOBJ("PRhand"));
-	plleg_.reset(Model::CreateFromOBJ("PLleg"));
-	prleg_.reset(Model::CreateFromOBJ("PRleg"));
+	playerModel[Parts::Body].reset(Model::CreateFromOBJ("pBody"));
+	playerModel[Parts::BodyUnder].reset(Model::CreateFromOBJ("pBodyUnder"));
+	playerModel[Parts::Head].reset(Model::CreateFromOBJ("pHead"));
+
+	playerModel[Parts::LArm1].reset(Model::CreateFromOBJ("pLArm1"));
+	playerModel[Parts::LArm2].reset(Model::CreateFromOBJ("pLArm2"));
+	playerModel[Parts::LHand].reset(Model::CreateFromOBJ("pLHand"));
+
+	playerModel[Parts::RArm1].reset(Model::CreateFromOBJ("pRArm1"));
+	playerModel[Parts::RArm2].reset(Model::CreateFromOBJ("pRArm2"));
+	playerModel[Parts::RHand].reset(Model::CreateFromOBJ("pRHand"));
+
+	playerModel[Parts::LLeg1].reset(Model::CreateFromOBJ("pLLeg1"));
+	playerModel[Parts::LLeg2].reset(Model::CreateFromOBJ("pLLeg"));
+	playerModel[Parts::LFoot].reset(Model::CreateFromOBJ("pLFoot"));
+
+	playerModel[Parts::RLeg1].reset(Model::CreateFromOBJ("pRLeg1"));
+	playerModel[Parts::RLeg2].reset(Model::CreateFromOBJ("pRLeg2"));
+	playerModel[Parts::RFoot].reset(Model::CreateFromOBJ("pRFoot"));
+
+
 	pweapon_.reset(Model::CreateFromOBJ("PWeapon"));
 
 
-	fire_.reset(Model::CreateFromOBJ("fire"));
-	jettpack_.reset(Model::CreateFromOBJ("jettpack"));
+	//fire_.reset(Model::CreateFromOBJ("fire"));
+	//jettpack_.reset(Model::CreateFromOBJ("jettpack"));
 
 	pAmmo_.reset(Model::CreateFromOBJ("ammo"));
 	eAmmo_.reset(Model::CreateFromOBJ("Eammo"));
@@ -96,8 +111,15 @@ void GameScene::LoadModel() {
 
 //クラスのロードまとめ
 void GameScene::LoadClass() {
-	std::vector<Model*> playerModels = {pweapon_.get(), pbody_.get(),  phead_.get(), plhand_.get(),  prhand_.get(),  plleg_.get(), prleg_.get(), jettpack_.get(), fire_.get(),  pAmmo_.get()};
-	
+	std::vector<Model*> playerModels={
+	    playerModel[Parts::Body].get(),  playerModel[Parts::BodyUnder].get(),
+	    playerModel[Parts::Head].get(),  playerModel[Parts::LArm1].get(),
+	    playerModel[Parts::LArm2].get(), playerModel[Parts::LHand].get(),
+	    playerModel[Parts::RArm1].get(),playerModel[Parts::RArm2].get(),
+	    playerModel[Parts::RHand].get() ,playerModel[Parts::LLeg1].get(),
+	    playerModel[Parts::LLeg2].get(), playerModel[Parts::LFoot].get(),
+	    playerModel[Parts::RLeg1].get(), playerModel[Parts::RLeg2].get(),
+	    playerModel[Parts::RFoot].get()};
 	// title
 	title_ = std::make_unique<TitleS>();
 	title_->Initialize(titleModel_.get(), titleTileM_.get());

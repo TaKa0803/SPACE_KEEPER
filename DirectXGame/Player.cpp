@@ -15,15 +15,9 @@ void Player::SetStart() {
 	playerMoveW.translation_ = {0, 0, -40.0f};
 	playerMoveW.rotation_ = {0, 0, 0};
 
-	bodyW_.translation_ = {0, 0.5f, 0};
-	bodyW_.rotation_ = {0, 0, 0};
-	headW_.translation_ = {0, 0.3f, 0};
-	LlegW_.translation_ = {-0.18f, -0.6f, 0};
-	RlegW_.translation_ = {0.18f, -0.6f, 0};
-	jettpack_.translation_ = {0, -0.1f, -0.64f};
+	
 
-	fire_.translation_ = {0, -0.3f, 0};
-	fire_.scale_ = {0.8f, 1, 0.8f};
+
 
 	canBulletShot_ = true;
 	shotcooltime_ = 0;
@@ -51,42 +45,9 @@ void Player::Initialize(const std::vector<Model*>& models, const uint32_t HP) {
 
 	reticle_ = new Reticle();
 	reticle_->Initialize(models_[9], playerMoveW);
-
-
-	bodyW_.Initialize();
-	bodyW_.translation_ = {0, 0.5f, 0};
-	headW_.Initialize();
-	headW_.translation_ = {0, 0.3f, 0};
-	LhandW_.Initialize();
-	RhandW_.Initialize();
-	LlegW_.Initialize();
-	LlegW_.translation_ = {-0.18f, -0.6f, 0};
-	RlegW_.Initialize();
-	RlegW_.translation_ = {0.18f, -0.6f, 0};
-	weaponW_.Initialize();
-
-	jettpack_.Initialize();
-	jettpack_.translation_ = {0, -0.1f, -0.64f};
-	fire_.Initialize();
-	fire_.translation_ = {0, -0.3f, 0};
-	fire_.scale_ = {0.8f, 1, 0.8f};
-	bodyW_.parent_ = &worldtransform_;
-	headW_.parent_ = &bodyW_;
-	LhandW_.parent_ = &bodyW_;
-	RhandW_.parent_ = &bodyW_;
-	LlegW_.parent_ = &bodyW_;
-	RlegW_.parent_ = &bodyW_;
-
-	weaponW_.parent_ = &bodyW_;
-
-	jettpack_.parent_ = &bodyW_;
-	fire_.parent_ = &jettpack_;
-
 	const int texheight = 720 - 40;
-
 	float x = 1280.0f - (64.0f * 10.0f);
 	x /= 2;
-
 	hptex_ = TextureManager::Load("HPplayer.png");
 
 	for (int i = 0; i < 10; i++) {
@@ -94,6 +55,56 @@ void Player::Initialize(const std::vector<Model*>& models, const uint32_t HP) {
 		    Sprite::Create(hptex_, {x + 64 * i, texheight}, {1.0f, 1.0f, 1.0f, 1.0f}, {0.5f, 0.5f});
 	}
 
+
+
+	for (int i = 0; i < partsNum; i++) {
+		parts[i].Initialize();
+	}
+
+	//BODY
+	parts[Parts::Body].parent_ = &worldtransform_;
+	parts[Parts::BodyUnder].parent_ = &parts[Parts::Body];
+	parts[Parts::Head].parent_ = &parts[Parts::Body];
+
+	parts[Parts::LArm1].parent_ = &parts[Parts::Body];
+	parts[Parts::LArm2].parent_ = &parts[Parts::LArm1];
+	parts[Parts::LHand].parent_ = &parts[Parts::LArm2];
+
+	parts[Parts::RArm1].parent_ = &parts[Parts::Body];
+	parts[Parts::RArm2].parent_ = &parts[Parts::RArm1];
+	parts[Parts::RHand].parent_ = &parts[Parts::RArm2];
+
+	parts[Parts::LLeg1].parent_ = &parts[Parts::BodyUnder];
+	parts[Parts::LLeg2].parent_ = &parts[Parts::LLeg1];
+	parts[Parts::LFoot].parent_ = &parts[Parts::LLeg2];
+
+	parts[Parts::RLeg1].parent_ = &parts[Parts::BodyUnder];
+	parts[Parts::RLeg2].parent_ = &parts[Parts::RLeg1];
+	parts[Parts::RFoot].parent_ = &parts[Parts::RLeg2];
+
+
+
+
+
+	parts[Parts::Body].translation_ = {0, 0, 0};
+	parts[Parts::BodyUnder].translation_ = {0, 0, 0};
+	parts[Parts::Head].translation_ = {0, 2.6f, 0};
+
+	parts[Parts::LArm1].translation_ = {-0.8f, 1.57f, 0};
+	parts[Parts::LArm2].translation_ = {-1.73f, 0, 0};
+	parts[Parts::LHand].translation_ = {-2.37f, 0, 0};
+
+	parts[Parts::RArm1].translation_ = {0.8f, 1.57f, 0};
+	parts[Parts::RArm2].translation_ = {1.73f, 0, 0};
+	parts[Parts::RHand].translation_ = {2.37f, 0, 0};
+
+	parts[Parts::LLeg1].translation_ = {-0.3f, -1.7f, 0};
+	parts[Parts::LLeg2].translation_ = {0, -2.2f, 0};
+	parts[Parts::LFoot].translation_ = {-0.12f, -2.2f, 0};
+
+	parts[Parts::RLeg1].translation_ = {0.3f, -1.7f, 0};
+	parts[Parts::RLeg2].translation_ = {0, -2.2f, 0};
+	parts[Parts::RFoot].translation_ = {0.12f, -2.2f, 0};
 }
 
 void Player::GetStatus() {
@@ -179,9 +190,7 @@ void Player::EndUpdate(bool ismove, float Clong, float et) {
 		//前に進む
 		playerMoveW.translation_ = Esing(stP, edP, et);
 
-		weaponW_.rotation_.x = 0.5f;
-		LhandW_.rotation_.x = 0.5f;
-		RhandW_.rotation_.x = 0.5f;
+		
 	
 
 		
@@ -189,7 +198,7 @@ void Player::EndUpdate(bool ismove, float Clong, float et) {
 
 	
 	
-	fire_.rotation_.y += (1.0f / 30.0f) * pi;
+	
 
 	// 行列更新まとめ
 	UpdateAllMatrix();
@@ -237,7 +246,7 @@ void Player::Move() {
 #ifdef _DEBUG
 	ImGui::Text("player");
 	ImGui::DragFloat3("p position", &worldtransform_.translation_.x, 0.01f);
-	ImGui::DragFloat3("p rotate", &worldtransform_.rotation_.x, 0.01f);
+	ImGui::DragFloat3("p ro", &worldtransform_.rotation_.x, 0.01f);
 	ImGui::DragFloat3("p scale", &worldtransform_.scale_.x, 0.01f);
 
 	ImGui::Text("player stand area");
@@ -294,36 +303,51 @@ void Player::Move() {
 	
 
 #ifdef _DEBUG
-	ImGui::DragFloat3("head p", &headW_.rotation_.x, 0.01f);
-	ImGui::DragFloat3("body p", &bodyW_.rotation_.x, 0.01f);
+	ImGui::Text("PARTS");
+	ImGui::DragFloat3("BT", &parts[Parts::Body].translation_.x, 0.01f);
+	ImGui::DragFloat3("HT", &parts[Parts::Head].translation_.x, 0.01f);
+	ImGui::DragFloat3("BUT", &parts[Parts::BodyUnder].translation_.x, 0.01f);
 
-	ImGui::DragFloat3("LH p", &LhandW_.rotation_.x, 0.01f);
-	ImGui::DragFloat3("RH p", &RhandW_.rotation_.x, 0.01f);
+	ImGui::DragFloat3("LA1T", &parts[Parts::LArm1].translation_.x, 0.01f);
+	ImGui::DragFloat3("LA2T", &parts[Parts::LArm2].translation_.x, 0.01f);
+	ImGui::DragFloat3("Lha", &parts[Parts::LHand].translation_.x, 0.01f);
 
-	ImGui::DragFloat3("LL p", &LlegW_.rotation_.x, 0.01f);
-	ImGui::DragFloat3("RL p", &RlegW_.rotation_.x, 0.01f);
+	ImGui::DragFloat3("RA1T", &parts[Parts::RArm1].translation_.x, 0.01f);
+	ImGui::DragFloat3("RA2T", &parts[Parts::RArm2].translation_.x, 0.01f);
+	ImGui::DragFloat3("Rha", &parts[Parts::RHand].translation_.x, 0.01f);
 
-	ImGui::DragFloat3("weapon p", &weaponW_.rotation_.x, 0.01f);
+	ImGui::DragFloat3("LL1T", &parts[Parts::LLeg1].translation_.x, 0.01f);
+	ImGui::DragFloat3("LL2T", &parts[Parts::LLeg2].translation_.x, 0.01f);
+	ImGui::DragFloat3("LFT", &parts[Parts::LFoot].translation_.x, 0.01f);
 
-	ImGui::DragFloat3("jett p " ,&jettpack_.translation_.x, 0.01f);
-	ImGui::DragFloat3("jett p ", &fire_.translation_.x, 0.01f);
+	ImGui::DragFloat3("RL1T", &parts[Parts::RLeg1].translation_.x, 0.01f);
+	ImGui::DragFloat3("RL2T", &parts[Parts::RLeg2].translation_.x, 0.01f);
+	ImGui::DragFloat3("RFT", &parts[Parts::RFoot].translation_.x, 0.01f);
+
+	ImGui::Text("PARTSR");
+	ImGui::DragFloat3("BR", &parts[Parts::Body].rotation_.x, 0.01f);
+	ImGui::DragFloat3("HR", &parts[Parts::Head].rotation_.x, 0.01f);
+	ImGui::DragFloat3("BUR", &parts[Parts::BodyUnder].rotation_.x, 0.01f);
+
+	ImGui::DragFloat3("LA1R", &parts[Parts::LArm1].rotation_.x, 0.01f);
+	ImGui::DragFloat3("LA2R", &parts[Parts::LArm2].rotation_.x, 0.01f);
+	ImGui::DragFloat3("Lha", &parts[Parts::LHand].rotation_.x, 0.01f);
+
+	ImGui::DragFloat3("RA1R", &parts[Parts::RArm1].rotation_.x, 0.01f);
+	ImGui::DragFloat3("RA2R", &parts[Parts::RArm2].rotation_.x, 0.01f);
+	ImGui::DragFloat3("RhaR", &parts[Parts::RHand].rotation_.x, 0.01f);
+
+	ImGui::DragFloat3("LL1R", &parts[Parts::LLeg1].rotation_.x, 0.01f);
+	ImGui::DragFloat3("LL2R", &parts[Parts::LLeg2].rotation_.x, 0.01f);
+	ImGui::DragFloat3("LFR", &parts[Parts::LFoot].rotation_.x, 0.01f);
+
+	ImGui::DragFloat3("RL1R", &parts[Parts::RLeg1].rotation_.x, 0.01f);
+	ImGui::DragFloat3("RL2R", &parts[Parts::RLeg2].rotation_.x, 0.01f);
+	ImGui::DragFloat3("RFR", &parts[Parts::RFoot].rotation_.x, 0.01f);
 
 #endif // _DEBUG
-	if (isShot) {
-		weaponW_.rotation_.x = 0.0f;
-		LhandW_.rotation_.x = 0.0f;
-		RhandW_.rotation_.x = 0.0f;
-	} else {
-		weaponW_.rotation_.x = 0.5f;
-		LhandW_.rotation_.x = 0.5f;
-		RhandW_.rotation_.x = 0.5f;
 	
-	}
-	//プレイヤーのいちによって傾き
-	bodyW_.rotation_.z = (worldtransform_.translation_.x/-area)*pi*(1.0f/6.0f);
-	bodyW_.rotation_.x = (worldtransform_.translation_.z / area) * pi * (1.0f / 10.0f);
-
-	fire_.rotation_.y += (1.0f / 30.0f) * pi;
+	
 
 	UpdateAllMatrix();
 
@@ -346,6 +370,8 @@ void Player::Update() {
 	targetW_.translation_ = target_->translation_;
 #ifdef _DEBUG
 	ImGui::Begin("Player");
+
+	
 #endif // _DEBUG
 	Move();
 	//camera to fov
@@ -380,7 +406,7 @@ void Player::TitleUpdate(float Clong) {
 	ImGui::Begin("Player");
 	ImGui::Text("player");
 	ImGui::DragFloat3("position", &worldtransform_.translation_.x, 0.01f);
-	ImGui::DragFloat3("rotate", &worldtransform_.rotation_.x, 0.01f);
+	ImGui::DragFloat3("ro", &worldtransform_.rotation_.x, 0.01f);
 	ImGui::DragFloat3("scale", &worldtransform_.scale_.x, 0.01f);
 
 	ImGui::Text("player stand area");
@@ -396,16 +422,51 @@ void Player::TitleUpdate(float Clong) {
 	ImGui::Text("pushcount:canShot:shotcooltime / %d:%d:%d", PushingCount_,canBulletShot_,shotcooltime_);
 	ImGui::End();
 #endif // _DEBUG
-	if (isShot) {
-		weaponW_.rotation_.x = 0.0f;
-		LhandW_.rotation_.x = 0.0f;
-		RhandW_.rotation_.x = 0.0f;
-	} else {
-		weaponW_.rotation_.x = 0.5f;
-		LhandW_.rotation_.x = 0.5f;
-		RhandW_.rotation_.x = 0.5f;
-	}
-	fire_.rotation_.y += (1.0f / 30.0f) * pi;
+	
+	#ifdef _DEBUG
+	ImGui::Text("PARTS");
+	ImGui::DragFloat3("BT", &parts[Parts::Body].translation_.x, 0.01f);
+	ImGui::DragFloat3("HT", &parts[Parts::Head].translation_.x, 0.01f);
+	ImGui::DragFloat3("BUT", &parts[Parts::BodyUnder].translation_.x, 0.01f);
+
+	ImGui::DragFloat3("LA1T", &parts[Parts::LArm1].translation_.x, 0.01f);
+	ImGui::DragFloat3("LA2T", &parts[Parts::LArm2].translation_.x, 0.01f);
+	ImGui::DragFloat3("Lha", &parts[Parts::LHand].translation_.x, 0.01f);
+
+	ImGui::DragFloat3("RA1T", &parts[Parts::RArm1].translation_.x, 0.01f);
+	ImGui::DragFloat3("RA2T", &parts[Parts::RArm2].translation_.x, 0.01f);
+	ImGui::DragFloat3("Rha", &parts[Parts::RHand].translation_.x, 0.01f);
+
+	ImGui::DragFloat3("LL1T", &parts[Parts::LLeg1].translation_.x, 0.01f);
+	ImGui::DragFloat3("LL2T", &parts[Parts::LLeg2].translation_.x, 0.01f);
+	ImGui::DragFloat3("LFT", &parts[Parts::LFoot].translation_.x, 0.01f);
+
+	ImGui::DragFloat3("RL1T", &parts[Parts::RLeg1].translation_.x, 0.01f);
+	ImGui::DragFloat3("RL2T", &parts[Parts::RLeg2].translation_.x, 0.01f);
+	ImGui::DragFloat3("RFT", &parts[Parts::RFoot].translation_.x, 0.01f);
+
+	ImGui::Text("PARTSR");
+	ImGui::DragFloat3("BR", &parts[Parts::Body].rotation_.x, 0.01f);
+	ImGui::DragFloat3("HR", &parts[Parts::Head].rotation_.x, 0.01f);
+	ImGui::DragFloat3("BUR", &parts[Parts::BodyUnder].rotation_.x, 0.01f);
+
+	ImGui::DragFloat3("LA1R", &parts[Parts::LArm1].rotation_.x, 0.01f);
+	ImGui::DragFloat3("LA2R", &parts[Parts::LArm2].rotation_.x, 0.01f);
+	ImGui::DragFloat3("LhaR", &parts[Parts::LHand].rotation_.x, 0.01f);
+
+	ImGui::DragFloat3("RA1R", &parts[Parts::RArm1].rotation_.x, 0.01f);
+	ImGui::DragFloat3("RA2R", &parts[Parts::RArm2].rotation_.x, 0.01f);
+	ImGui::DragFloat3("RhaR", &parts[Parts::RHand].rotation_.x, 0.01f);
+
+	ImGui::DragFloat3("LL1R", &parts[Parts::LLeg1].rotation_.x, 0.01f);
+	ImGui::DragFloat3("LL2R", &parts[Parts::LLeg2].rotation_.x, 0.01f);
+	ImGui::DragFloat3("LFR", &parts[Parts::LFoot].rotation_.x, 0.01f);
+
+	ImGui::DragFloat3("RL1R", &parts[Parts::RLeg1].rotation_.x, 0.01f);
+	ImGui::DragFloat3("RL2R", &parts[Parts::RLeg2].rotation_.x, 0.01f);
+	ImGui::DragFloat3("RFR", &parts[Parts::RFoot].rotation_.x, 0.01f);
+
+#endif // _DEBUG
 
 	//行列更新まとめ
 	UpdateAllMatrix();
@@ -427,17 +488,11 @@ void Player::UpdateAllMatrix() {
 	// playermoveを中心として移動
 	worldtransform_.UpdateMatrix();
 
-	bodyW_.UpdateMatrix();
-	headW_.UpdateMatrix();
-	LhandW_.UpdateMatrix();
-	RhandW_.UpdateMatrix();
-	LlegW_.UpdateMatrix();
-	RlegW_.UpdateMatrix();
-	weaponW_.UpdateMatrix();
-
-	jettpack_.UpdateMatrix();
-	fire_.UpdateMatrix();
+	for (int i = 0; i < partsNum; i++) {
+		parts[i].UpdateMatrix();
+	}
 }
+
 
 /// <summary>
 /// 描画
@@ -448,33 +503,18 @@ void Player::Draw(const ViewProjection& view) {
 	//レティクル描画
 	reticle_->Draw(view);
 
-	//武器
-	models_[0]->Draw(weaponW_, view);
-	//身体
-	models_[1]->Draw(bodyW_, view);
-	//頭
-	models_[2]->Draw(headW_, view);
-	//腕
-	models_[3]->Draw(LhandW_, view);
-	models_[4]->Draw(RhandW_, view);
-	//足
-	models_[5]->Draw(LlegW_, view);
-	models_[6]->Draw(RlegW_, view);
 
-	//じぇっぱ
-	models_[7]->Draw(jettpack_, view);
-
-
-	if (! isShot) {
-		// 炎
-		models_[8]->Draw(fire_, view);
+	for (int i = 0; i < partsNum; i++) {
+		models_[i]->Draw(parts[i], view);
 	}
+	//models_[Parts::Head]->Draw(parts[Parts::Head], view);
 }
 
 void Player::DrawUI() { 
 	
 	reticle_->DrawSPrite();
 
+	
 
 	for (int i = 0; i < (int)hp_; i++) {
 		const int texheight = 720 - 40;
